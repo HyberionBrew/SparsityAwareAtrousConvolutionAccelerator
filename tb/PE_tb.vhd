@@ -19,7 +19,7 @@ architecture arch of PE_tb is
   signal finished : std_logic;
    signal to_index: INDEX_TYPE;
   signal valid: std_logic;
-  
+  signal stall: std_logic;
   function to_std_logic(c : character) return std_logic is
     variable sl : std_logic;
     begin
@@ -65,6 +65,7 @@ begin
   PE_i : entity work.PE
   port map (
     reset => reset,
+    stall => stall,
     clk             => clk,
     finished        => finished,
     new_kernels     => new_kernels,
@@ -92,6 +93,16 @@ begin
     wait for CLK_PERIOD/2;
   end process;
 
+  stall_stim: process
+  begin
+     while true loop
+      stall <= '0';
+      wait for CLK_PERIOD*7;
+      stall <= '1';
+      wait for CLK_PERIOD*11;
+    end loop;
+  end process;
+
   stimulus : process
   file infile : text open read_mode is "input_pe_test.txt";
   variable inline, outline : line;
@@ -107,14 +118,20 @@ begin
     new_ifmaps <= '0';
     new_kernels <= '0';
     bus_to_pe <= (others => 'U');
+   
    -- bus_to_pe(3 downto 0) <= "0000";
     --ifmap_bitvec <= "101011";--"000011";--(others=> '0');
     --weight_bitvec <= "111100010";--"111100000";--(others=> '0');
+    wait for CLK_PERIOD * 6;
     while not(endfile(infile)) loop
+        while finished = '0' loop
+            wait for CLK_PERIOD;
+        end loop;
+        
         wait for CLK_PERIOD;
         readline(infile,inline);
         read(inline,int); -- tells us if ifmaps+ kernels or only kernels
-       
+        
         if int = 1 then
         
             reset <= '1';
@@ -149,7 +166,9 @@ begin
         read(inline,int);
  
         while not(int = -999999) loop
+
             if valid = '1' then
+     
                 read(inline,x_should);
                 read(inline,y_should);
                 read(inline,w_should);

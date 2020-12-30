@@ -11,6 +11,7 @@ entity PE is
   port (
 
   reset, clk : in std_logic;
+  stall: in std_logic;
   finished : out std_logic;
   new_kernels : in std_logic;
   new_ifmaps : in std_logic;
@@ -25,7 +26,6 @@ end entity;
 
 architecture arch of PE is
 
-  signal stall           : std_logic;
 
   signal bitvec          : std_logic;
   signal current_row     : natural range 0 to IFMAP_ROWS_TILED-1;

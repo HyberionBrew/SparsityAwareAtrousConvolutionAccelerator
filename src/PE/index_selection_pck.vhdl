@@ -36,7 +36,10 @@ package index_selection_pck is
                                   kernel_counter : natural range 0 to KERNEL_COUNTER_MAX-1
                                   ) return ACTIVE_KERNEL_REGS;
 
-
+    procedure compute_bitvec(variable bitvec_var: out std_logic_vector(EXTRACTION_WIDTH-1 downto 0);
+                             signal ifmap_reg : in MEM_BITVEC_IFMAP;
+                             signal ifmap_counter: in integer range 0 to IFMAPS_PER_PE-1;
+                             signal active_kernels: in ACTIVE_KERNEL_REGS);
 
 end package;
 
@@ -45,6 +48,32 @@ end package;
 package body index_selection_pck is
 
 
+    procedure compute_bitvec(variable bitvec_var: out std_logic_vector(EXTRACTION_WIDTH-1 downto 0);
+                             signal ifmap_reg : in MEM_BITVEC_IFMAP;
+                             signal ifmap_counter: in integer range 0 to IFMAPS_PER_PE-1;
+                             signal active_kernels: in ACTIVE_KERNEL_REGS) is
+    variable temp: std_logic_vector(5 downto 0);
+    variable temp2: std_logic_vector(5 downto 0) := (others => '1');
+    begin
+        for K in 1 to SIMULTANEOUS_KERNELS loop
+          --bitvec_var((IFMAP_BITVEC_SIZE)*I-1 downto (I-1) *IFMAP_BITVEC_SIZE) := ifmap_reg(ifmap_counter) AND active_kernels(I-1)(IFMAP_BITVEC_SIZE-1 downto 0);
+           -- --bitvec_var := (others=> '1');
+            --temp := ifmap_reg(ifmap_counter) AND "101010";
+            
+            temp := ifmap_reg(ifmap_counter);--AND temp2;
+            temp2 := active_kernels(K-1)(VALUES_PER_IFMAP-1 downto 0);
+            --just using an and chrashes VIVADO!!!! WTF??!!
+            for I in temp'low to temp'high loop
+                bitvec_var(I+(K-1)*VALUES_PER_IFMAP) := temp(I) and temp2(I);--active_kernels(K-1)(I);
+            end loop; 
+            --bitvec_var(5 downto 0) := temp;
+           -- bitvec_var(VALUES_PER_IFMAP*I-1 downto (I-1)*VALUES_PER_IFMAP):= temp;-- AND "101010"; --AND active_kernels(I-1)(VALUES_PER_IFMAP-1 downto 0);
+        end loop;
+
+    end procedure;
+    
+    
+    
   procedure mask_last (variable bitvec_var: inout std_logic_vector(EXTRACTION_WIDTH-1 downto 0);
                        signal index: out natural range 0 to EXTRACTION_WIDTH-1;
                        variable valid_var: out std_logic) is

@@ -49,35 +49,10 @@ architecture arch of index_selection is
 
   signal active_kernels, active_kernels_nxt: ACTIVE_KERNEL_REGS;
 
-
-
-    procedure compute_bitvec(variable bitvec_var: out std_logic_vector(EXTRACTION_WIDTH-1 downto 0);
-                             signal ifmap_reg : in MEM_BITVEC_IFMAP;
-                             signal ifmap_counter: in integer range 0 to IFMAPS_PER_PE-1;
-                             signal active_kernels: in ACTIVE_KERNEL_REGS) is
-    variable temp: std_logic_vector(5 downto 0);
-    variable temp2: std_logic_vector(5 downto 0) := (others => '1');
-    begin
-        for K in 1 to SIMULTANEOUS_KERNELS loop
-          --bitvec_var((IFMAP_BITVEC_SIZE)*I-1 downto (I-1) *IFMAP_BITVEC_SIZE) := ifmap_reg(ifmap_counter) AND active_kernels(I-1)(IFMAP_BITVEC_SIZE-1 downto 0);
-           -- --bitvec_var := (others=> '1');
-            --temp := ifmap_reg(ifmap_counter) AND "101010";
-            
-            temp := ifmap_reg(ifmap_counter);--AND temp2;
-            temp2 := active_kernels(K-1)(VALUES_PER_IFMAP-1 downto 0);
-            --just using an and chrashes VIVADO!!!! WTF??!!
-            for I in temp'low to temp'high loop
-                bitvec_var(I+(K-1)*VALUES_PER_IFMAP) := temp(I) and temp2(I);--active_kernels(K-1)(I);
-            end loop; 
-            --bitvec_var(5 downto 0) := temp;
-           -- bitvec_var(VALUES_PER_IFMAP*I-1 downto (I-1)*VALUES_PER_IFMAP):= temp;-- AND "101010"; --AND active_kernels(I-1)(VALUES_PER_IFMAP-1 downto 0);
-        end loop;
-
-    end procedure;
-
-
-
-
+    
+  constant FINISHED_DELAY_CYCLES : integer := 4;
+  type finished_delay_type is array (0 to FINISHED_DELAY_CYCLES-1) of std_logic;
+  signal finished_delay, finished_delay_nxt : finished_delay_type;
 
 begin
 sync : process(clk,reset)
@@ -91,7 +66,9 @@ begin
     shift <= 0;
     kernel_counter <= 0;
     active_kernels <= (others=> (others=> '0'));
+    finished_delay <= (others => '1');
   elsif rising_edge(clk) then
+    finished_delay <= finished_delay_nxt;
     weight_reg <= weight_reg_nxt;
     ifmap_reg <= ifmap_reg_nxt;
     ifmap_counter <= ifmap_counter_nxt;
@@ -105,6 +82,26 @@ begin
 end process;
 
 
+delay_finished: process(all)
+begin
+    
+   case(state) is 
+    when LOADING_VALUES =>
+        finished <= finished_delay(0);
+        if stall = '0' then
+            finished_delay_nxt(FINISHED_DELAY_CYCLES-1) <= '1';
+            for I in 0 to FINISHED_DELAY_CYCLES-2 loop
+                finished_delay_nxt(I) <= finished_delay(I+1);
+            end loop;
+        end if;
+    when others =>
+        finished_delay_nxt <= (others => '0');
+        finished <= '0';
+   end case;     
+
+
+end process;
+
 extract_index : process(all)
 variable bitvec_var: std_logic_vector(EXTRACTION_WIDTH-1 downto 0);
 variable valid_var: std_logic;
@@ -114,7 +111,7 @@ begin
   --have two calculation registers get new values if new_values and if in the last part of shift 8
   --maybe state get new values -> in that state compute everything directly from the Registers
   --else compute it from the existing REGister
-  finished <= '0';
+
   weight_reg_nxt <= weight_reg;
   ifmap_reg_nxt <= ifmap_reg;
   shift_nxt <= shift;
@@ -128,7 +125,7 @@ begin
   kernel_counter_nxt <= kernel_counter;
   active_kernels_nxt <= active_kernels;
   bitvec_var := bitvec;
-    
+  
   case(state) is
     --load new values
     when LOADING_VALUES =>
@@ -147,7 +144,7 @@ begin
       
       
       kernel_counter_nxt <= 0;
-      finished <= '1';
+   
       shift_nxt <= 0;
       ifmap_counter_nxt <= 0;
       new_bitvec_nxt <= '1';
@@ -170,10 +167,13 @@ begin
         bitvec_var := bitvec;
       end if;
       --shift now!
-      mask_last(bitvec_var, index, valid_var); --masks the last bit in the bitvec and returns valid
-
+      if stall = '0' then
+        mask_last(bitvec_var, index, valid_var); --masks the last bit in the bitvec and returns valid
+      else
+        valid_var := '0';
+      end if;
       --in the case no valid value will be extracted in the next cycle shift already here
-      if valid_var = '0' then
+      if valid_var = '0' and stall = '0' then
         shift_nxt <= shift +1;
         new_bitvec_nxt <= '1';
         for I in 0 to SIMULTANEOUS_KERNELS-1 loop
