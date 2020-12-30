@@ -45,17 +45,6 @@ end package;
 package body index_selection_pck is
 
 
-
-
-
-
-
-
-
-
-
-
-
   procedure mask_last (variable bitvec_var: inout std_logic_vector(EXTRACTION_WIDTH-1 downto 0);
                        signal index: out natural range 0 to EXTRACTION_WIDTH-1;
                        variable valid_var: out std_logic) is

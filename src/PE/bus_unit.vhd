@@ -19,14 +19,14 @@ entity bus_unit is
   bitvec : out std_logic; --the new bitvectors
   current_row : out natural range 0 to IFMAP_ROWS_TILED-1; --33
   current_column : out natural range 0 to IFMAP_COLUMNS_TILED-1; --6
-  zeroes : out std_logic_vector (ZERO_WIDTH-1 downto 0);
+  zeroes : out std_logic_vector (ZERO_WIDTH_KERNEL-1 downto 0);
   --zero_weights : out ZERO_POINT_KERNEL_ARRAY;
   write_from_bus : out std_logic;
   -- only for index_select
   fetch_ifmaps : out std_logic;
   fetch_kernels : out std_logic;
   bitvecs : out std_logic_vector(MAX_BITVECS_WIDTH-1 downto 0);
-  values : out std_logic_vector(MEM_WIDTH-1 downto 0)
+  values : out std_logic_vector(MAX_MEM_WIDTH-1 downto 0)
   );
 end entity;
 
@@ -38,6 +38,8 @@ begin
     --repsonsible for extracting the bitvecs and writing them to the index_selection unit
     current_row_col_forward: process(all)
     begin
+        current_row <= 0;
+        current_column <= 0;
         if new_ifmaps = '1' then
             current_row <= extract_current_row(bus_to_pe);
             current_column <= extract_current_column(bus_to_pe);
@@ -45,10 +47,11 @@ begin
     end process;
     
     
-    bitvec_calc : process(all)
+    bitvec_calc : process(all)  --done
     begin
       fetch_ifmaps <= '0';
       fetch_kernels <= '0';
+      bitvecs <= (others => '0');
       if new_ifmaps = '1' then
         fetch_ifmaps <= '1';
         bitvecs <= extract_bitvecs_ifmaps(bus_to_pe);
@@ -58,8 +61,9 @@ begin
       end if;
     end process;
     
-    data_forward :process(all)
+    data_forward :process(all) --done
     begin
+        values <= (others => '0');
         if new_ifmaps = '1' then
             values <= extract_data_ifmap(bus_to_pe);
          elsif new_kernels = '1' then
@@ -69,8 +73,9 @@ begin
     
     zeroes_forward: process(all)
     begin
+        zeroes <= (others => '0');
         if new_ifmaps = '1' then
-            zeroes <= extract_zeroes_ifmap(bus_to_pe);
+            zeroes(ZERO_WIDTH_IFMAP-1 downto 0) <= extract_zeroes_ifmap(bus_to_pe);
         elsif new_kernels = '1' then
             zeroes <= extract_zeroes_kernel(bus_to_pe);
         end if;

@@ -44,7 +44,6 @@ architecture arch of index_selection is
 
   signal bitvec_nxt, bitvec: std_logic_vector(EXTRACTION_WIDTH-1 downto 0);
 
-  signal fetch_counter, fetch_counter_nxt: natural range 0 to WRITE_DEPTH-1;
 
   signal kernel_counter_nxt :natural range 0 to KERNEL_COUNTER_MAX-1;
 
@@ -90,7 +89,6 @@ begin
     state <= LOADING_VALUES;
     bitvec <= (others => '0');
     shift <= 0;
-    fetch_counter <= 0;
     kernel_counter <= 0;
     active_kernels <= (others=> (others=> '0'));
   elsif rising_edge(clk) then
@@ -101,7 +99,6 @@ begin
     bitvec <= bitvec_nxt;
     shift <= shift_nxt;
     new_bitvec <= new_bitvec_nxt;
-    fetch_counter <= fetch_counter_nxt;
     kernel_counter <= kernel_counter_nxt;
     active_kernels <= active_kernels_nxt;
   end if;
@@ -127,7 +124,7 @@ begin
   valid <= '0';
   index <= 0;
   new_bitvec_nxt <= '0';
-  fetch_counter_nxt <= 0;
+
   kernel_counter_nxt <= kernel_counter;
   active_kernels_nxt <= active_kernels;
   bitvec_var := bitvec;
@@ -136,23 +133,16 @@ begin
     --load new values
     when LOADING_VALUES =>
       if fetch_values_ifmap = '1' then
-        for I in 1 to IFMAPS_PER_BUS_ACCESS loop
-             ifmap_reg_nxt(I-1 + fetch_counter*IFMAPS_PER_BUS_ACCESS) <= bitvec_in(VALUES_PER_IFMAP*I-1 downto VALUES_PER_IFMAP*(I-1));
+        for I in 1 to IFMAPS_PER_PE loop
+             ifmap_reg_nxt(I-1) <= bitvec_in(VALUES_PER_IFMAP*I-1 downto VALUES_PER_IFMAP*(I-1));
         end loop; 
-        fetch_counter_nxt <= fetch_counter + 1;
-        if fetch_counter = WRITE_DEPTH-1 then
-          fetch_counter_nxt <= 0;
-        end if;
+
 
       elsif fetch_values_kernel = '1' then
-       for I in 1 to KERNELS_PER_BUS_ACCESS loop
-            weight_reg_nxt(I-1 + fetch_counter*KERNELS_PER_BUS_ACCESS) <= bitvec_in(VALUES_PER_KERNEL*I-1 downto VALUES_PER_KERNEL*(I-1));
+       for I in 1 to KERNELS_PER_PE loop
+            weight_reg_nxt(I-1) <= bitvec_in(VALUES_PER_KERNEL*I-1 downto VALUES_PER_KERNEL*(I-1));
         end loop;
-        fetch_counter_nxt <= fetch_counter + 1;
-        if fetch_counter = WRITE_DEPTH-1 then
-            fetch_counter_nxt <= 0;
-          state_nxt <= SET_NEW_ACTIVE_KERNEL;
-        end if;
+        state_nxt <= SET_NEW_ACTIVE_KERNEL;
       end if;
       
       

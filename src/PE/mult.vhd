@@ -6,7 +6,8 @@ use work.pe_pack.all;
 
 entity mult_unit is
   port (
-  reset, clk: in std_logic;
+  clk : in std_logic;
+  reset: in std_logic;
   weight_val_in : in std_logic_vector(DATA_WIDTH-1 downto 0);
   ifmap_val_in : in std_logic_vector(DATA_WIDTH-1 downto 0);
   result : out signed(DATA_WIDTH_RESULT-1 downto 0);
@@ -24,9 +25,9 @@ architecture arch of mult_unit is
  -- signal result_scale,result_scale_nxt: signed(SCALE_MULT_SIZE*2-1 downto 0);
   --signal test: sfixed(SCALE_MULT_SIZE*2-1 downto 0);
   signal reg_weight,weight_val, reg_weight_nxt,reg_ifmap,reg_ifmap_nxt :signed(DATA_WIDTH+1-1 downto 0);
-   
-  signal kernel_val, ifmap_val : std_logic_vector(DATA_WIDTH-1 downto 0);
-  signal Z_weight, Z_index : std_logic_vector(DATA_WIDTH_ZEROS-1 downto 0);
+  signal ifmap_val_nxt:  std_logic_vector(DATA_WIDTH-1 downto 0);
+  signal kernel_val, ifmap_val,kernel_val_nxt : std_logic_vector(DATA_WIDTH-1 downto 0);
+  signal Z_weight, Z_index,Z_weight_nxt,Z_index_nxt : std_logic_vector(DATA_WIDTH_ZEROS-1 downto 0);
 
   function round_away_from_zero(vec : signed(64-1 downto 0); n_in: unsigned(6-1 downto 0)) return signed is
       variable n: unsigned(6-1 downto 0) := to_unsigned(31,6);
@@ -69,19 +70,21 @@ begin
       kernel_val <= (others => '0');
       
     elsif rising_edge(clk) then
-      ifmap_val <= ifmap_val_in;
-      kernel_val <= weight_val_in;
-      Z_weight <= Z_weight_in;
-      Z_index <= Z_index_in;
+      ifmap_val <= ifmap_val_nxt;
+      kernel_val <= kernel_val_nxt;
+      Z_weight <= Z_weight_nxt;
+      Z_index <= Z_index_nxt;
       reg_weight <= reg_weight_nxt;
       reg_ifmap <= reg_ifmap_nxt;
     end if;
   end process;
 
   mult : process(all)
-  variable x:integer;
   begin
-    
+    ifmap_val_nxt <= ifmap_val_in;
+    kernel_val_nxt <= weight_val_in;
+    Z_weight_nxt <= Z_weight_in;
+    Z_index_nxt <= Z_index_in;
     reg_weight_nxt <= to_signed(to_integer(signed(kernel_val))-to_integer(unsigned(Z_weight)), reg_weight_nxt'length);
     reg_ifmap_nxt <= to_signed(to_integer(unsigned(ifmap_val))-to_integer(unsigned(Z_index)),reg_ifmap_nxt'length);
 

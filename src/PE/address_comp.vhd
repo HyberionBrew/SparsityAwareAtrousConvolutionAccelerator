@@ -58,16 +58,14 @@ begin
   variable kernel_offset :natural range 0 to MAX_ADDR_KERNEL-1;
   variable ifmap_offset :natural range 0 to MAX_ADDR_KERNEL-1;
   begin
-    index_out <= index_intern;
+   -- index_out <= index_intern;
+   index_norm := 0;
     --calculate address offset, could write this mpre general in a for loop
-    if ifmap_counter_intern > IFMAPS_PER_BUS_ACCESS-1 then
-        ifmap_offset :=  IFMAP_OFFSET_C + (ifmap_counter_intern-IFMAPS_PER_BUS_ACCESS)*VALUES_PER_IFMAP;
-    else 
-        ifmap_offset :=  (ifmap_counter_intern)*VALUES_PER_IFMAP;
-    end if;
+    ifmap_offset :=  (ifmap_counter_intern)*VALUES_PER_IFMAP;
+
     
     if kernel_counter_intern > 0 then
-        kernel_offset :=  KERNEL_OFFSET_C;
+        kernel_offset :=  SIMULTANEOUS_KERNELS*VALUES_PER_KERNEL;
     else 
         kernel_offset :=  0;
     end if;
@@ -75,6 +73,7 @@ begin
     addr_ifmap <= (index_intern mod IFMAP_BITVEC_SIZE) + ifmap_offset;--to_integer(OFFSET_IFMAP_AR(to_integer(current_ifmap))),addra_ifmap'length));
 
     --calculate which of the 3 kernels is triggered
+    kernel_number := 0;
     for I in 1 to SIMULTANEOUS_KERNELS loop
       if index_intern >= VALUES_PER_IFMAP * (I-1) and index_intern < VALUES_PER_IFMAP * I then
         kernel_number := I-1;

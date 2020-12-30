@@ -11,7 +11,7 @@ package core_pck is
 
   constant WRITE_DEPTH : Integer := 2;
 
-  constant BUSSIZE : integer:=512;
+  constant BUSSIZE : integer:=557;
   --for PE
   constant VALUES_PER_KERNEL : integer := 9;
   constant VALUES_PER_IFMAP: integer := 6;
@@ -21,9 +21,9 @@ package core_pck is
   constant KERNEL_DATA_WIDTH : Integer := DATA_WIDTH * VALUES_PER_KERNEL;
   constant IFMAP_DATA_WIDTH : Integer := DATA_WIDTH * VALUES_PER_IFMAP;
 
-  constant KERNELS_PER_BUS_ACCESS : integer := KERNELS_PER_PE/WRITE_DEPTH;
+  constant KERNELS_PER_BUS_ACCESS : integer := KERNELS_PER_PE/WRITE_DEPTH; --to remove
 
-  constant IFMAPS_PER_BUS_ACCESS : integer := IFMAPS_PER_PE/WRITE_DEPTH;
+  constant IFMAPS_PER_BUS_ACCESS : integer := IFMAPS_PER_PE/WRITE_DEPTH;--to remove
   
 
      --constant SHIFT_SIZE : integer := 9;

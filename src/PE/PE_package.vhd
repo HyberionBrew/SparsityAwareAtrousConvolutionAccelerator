@@ -11,28 +11,34 @@ package pe_pack is
   constant IFMAP_BITVEC_SIZE : integer := 6;
   constant KERNEL_BITVEC_SIZE : integer := 9;
   constant EXTRACTION_WIDTH :integer := VALUES_PER_IFMAP * SIMULTANEOUS_KERNELS;
-  constant MAX_BITVECS_WIDTH : integer := maximum(KERNELS_PER_BUS_ACCESS*KERNEL_BITVEC_SIZE, IFMAPS_PER_BUS_ACCESS*IFMAP_BITVEC_SIZE);
+  constant MAX_BITVECS_WIDTH : integer := maximum(KERNELS_PER_PE*KERNEL_BITVEC_SIZE, IFMAPS_PER_PE*IFMAP_BITVEC_SIZE);
   --constant INDEX_SIZE: Integer := 4;
   constant ifmap_rows_tiled : integer := 33;
   constant MAX_ADDR_IFMAP : integer := 64;
   constant MAX_ADDR_KERNEL : integer := 64;
-  constant MAX_DATA_WIDTH : integer := maximum(KERNELS_PER_BUS_ACCESS* KERNEL_DATA_WIDTH, IFMAPS_PER_BUS_ACCESS*IFMAP_DATA_WIDTH);
-  constant BUS_DATA_OFFSET: integer := MAX_BITVECS_WIDTH;
-  constant BUS_ZEROES_OFFSET: integer := BUS_DATA_OFFSET + MAX_DATA_WIDTH;
-
-  constant MEM_WIDTH: Integer:= 256;
+  constant BUS_WIDTH_DATA_KERNEL : integer := KERNELS_PER_PE* KERNEL_DATA_WIDTH;
+  constant BUS_WIDTH_DATA_IFMAP : integer := IFMAPS_PER_PE* IFMAP_DATA_WIDTH;
+  constant BUS_DATA_OFFSET: integer := MAX_BITVECS_WIDTH; --60
   
-  constant IFMAP_ZERO_OFFSETS_PER_BUS : Integer := 1;
-   constant KERNEL_ZERO_OFFSETS_PER_BUS : Integer := KERNELS_PER_BUS_ACCESS;
-  constant MAX_ZERO_OFFSETS_PER_BUS :integer := KERNELS_PER_BUS_ACCESS;
+  constant BUS_ZEROES_OFFSET_KERNEL: integer := BUS_DATA_OFFSET + BUS_WIDTH_DATA_KERNEL;
+  
+  constant BUS_ZEROES_OFFSET_IFMAP: integer := BUS_DATA_OFFSET + BUS_WIDTH_DATA_IFMAP; --60 + 10 * 8 * 6 = 540
+  
+  
+  constant MAX_MEM_WIDTH: Integer:= maximum(BUS_WIDTH_DATA_KERNEL,BUS_WIDTH_DATA_IFMAP);
+  
+  
   constant DATA_WIDTH_ZEROS : integer := DATA_WIDTH;
-  constant ZERO_WIDTH : integer := KERNELS_PER_BUS_ACCESS* DATA_WIDTH_ZEROS;
+  constant ZERO_WIDTH_IFMAP : integer := DATA_WIDTH_ZEROS;
+  constant ZERO_WIDTH_KERNEL : integer := KERNELS_PER_PE* DATA_WIDTH_ZEROS;
+  
+  
   constant DATA_WIDTH_RESULT :integer := (DATA_WIDTH+1) *2;
   constant MAX_X :integer := 6;
   constant MAX_Y :integer := 33;
   constant DATA_WIDTH_ROW :integer:= 6;--from 0 to 5
   constant DATA_WIDTH_COLUMN : integer:= 3;--from 0 to 32
-  constant BUS_COLUMN_OFFSET: integer:= BUS_ZEROES_OFFSET +ZERO_WIDTH ;
+  constant BUS_COLUMN_OFFSET: integer:= BUS_ZEROES_OFFSET_IFMAP +ZERO_WIDTH_IFMAP;
   constant BUS_ROW_OFFSET: integer:= BUS_COLUMN_OFFSET+DATA_WIDTH_COLUMN;
   
   type INDEX_TYPE is record

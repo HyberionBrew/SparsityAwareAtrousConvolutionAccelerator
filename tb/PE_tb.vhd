@@ -13,7 +13,7 @@ architecture arch of PE_tb is
   signal clk: std_logic;
   --index select
   signal new_kernels, new_ifmaps, want_new_values: std_logic;
-  signal bus_to_pe : std_logic_vector(512-1 downto 0);
+  signal bus_to_pe : std_logic_vector(BUSSIZE-1 downto 0);
   signal reset:std_logic;
   signal result:signed(DATA_WIDTH_RESULT-1 downto 0);
   signal finished : std_logic;
@@ -95,13 +95,13 @@ begin
   stimulus : process
   file infile : text open read_mode is "input_pe_test.txt";
   variable inline, outline : line;
-  variable in_vec : string(1 to 303);
+  variable in_vec : string(1 to 557);
   variable SPACE: string(1 to 1);
   variable int, x_should,y_should,w_should :integer;
   variable case_counter: integer;
   variable final_count: integer;
   
-  constant BUSSIZE_C : integer := 303;
+  constant BUSSIZE_C : integer := 557;
   begin
     reset <= '0';
     new_ifmaps <= '0';
@@ -110,65 +110,69 @@ begin
    -- bus_to_pe(3 downto 0) <= "0000";
     --ifmap_bitvec <= "101011";--"000011";--(others=> '0');
     --weight_bitvec <= "111100010";--"111100000";--(others=> '0');
-    wait for CLK_PERIOD;
-    reset <= '1';
-    new_ifmaps <= '1';
-    readline(infile,inline);
-    read(inline, in_vec);
-
-    bus_to_pe(BUSSIZE_C-1 downto 0) <= to_std_logic_vector(in_vec); --first ifmaps
-    --bus_to_pe(3 downto 0) <= "0000";
-    wait for CLK_PERIOD;
-    readline(infile,inline);
-    read(inline, in_vec);
-
-    bus_to_pe(BUSSIZE_C-1 downto 0) <= to_std_logic_vector(in_vec); --second ifmaps
-    wait for CLK_PERIOD ;
-    readline(infile,inline);
-    read(inline, in_vec);
-
-    bus_to_pe(BUSSIZE_C-1 downto 0) <= to_std_logic_vector(in_vec);
-   -- bus_to_pe(1 downto 0) <= "00";
-    new_ifmaps <= '0';
-    new_kernels <= '1';
-     WAIT FOR CLK_PERIOD;
-     readline(infile,inline);
-    read(inline, in_vec);
-
-    bus_to_pe(BUSSIZE_C-1 downto 0) <= to_std_logic_vector(in_vec);
-    --now writing kernels
-    wait for CLK_PERIOD ;
-    
-    
-    bus_to_pe <= (others => 'U');
-    new_kernels <= '0';
-    wait for CLK_PERIOD;
-    readline(infile,inline);
-    read(inline,final_count);
-    report integer'image(final_count ) & ": test cases coming up";
-    case_counter := 0;
     while not(endfile(infile)) loop
-        if valid = '1' then
-            readline(infile,inline);
-            read(inline,int);
-            assert to_integer(result) = int report integer'image(case_counter)&" :ASSERTION FAILED! RESULT testcase: "  & integer'image(int) & " but is: " & integer'image(to_integer(result)) severity WARNING;
-            read(inline,x_should);
-
-            read(inline,y_should);
-            read(inline,w_should);
-            assert x_should = to_index.xindex report integer'image(case_counter)&" :ASSERTION FAILED! INDEX X testcase: "  & integer'image(x_should) & " but is: " & integer'image(to_index.xindex) severity WARNING;
-            assert y_should = to_index.yindex  report integer'image(case_counter)&" :ASSERTION FAILED!INDEX Y testcase: "  & integer'image(y_should) & " but is: " & integer'image(to_index.yindex) severity WARNING;
-            assert w_should = to_index.w  report integer'image(case_counter)&" :ASSERTION FAILED! W testcase: "  & integer'image(w_should) & " but is: " & integer'image(to_index.w) severity WARNING;
-
-            
-            if int = to_integer(result) then
-                case_counter := case_counter + 1;
-            end if;
-        end if;
         wait for CLK_PERIOD;
-    end loop;
-    report "passsed "& integer'image(case_counter) & "/" & integer'image(final_count);
+        readline(infile,inline);
+        read(inline,int); -- tells us if ifmaps+ kernels or only kernels
+       
+        if int = 1 then
+        
+            reset <= '1';
+            new_ifmaps <= '1';
+            readline(infile,inline);
+            read(inline, in_vec);
+        
+            bus_to_pe(BUSSIZE_C-1 downto 0) <= to_std_logic_vector(in_vec); --first ifmaps
+            --bus_to_pe(3 downto 0) <= "0000";
+            wait for CLK_PERIOD ;
+        end if;
+        
+        readline(infile,inline);
+        read(inline, in_vec);
     
+        bus_to_pe(BUSSIZE_C-1 downto 0) <= to_std_logic_vector(in_vec);
+       -- bus_to_pe(1 downto 0) <= "00";
+        new_ifmaps <= '0';
+        new_kernels <= '1';
+
+        wait for CLK_PERIOD ;
+        
+        bus_to_pe <= (others => 'U');
+        new_kernels <= '0';
+        wait for CLK_PERIOD;
+        readline(infile,inline);
+        read(inline,final_count);
+        report integer'image(final_count ) & ": test cases coming up";
+        case_counter := 0;
+        
+        readline(infile,inline);
+        read(inline,int);
+ 
+        while not(int = -999999) loop
+            if valid = '1' then
+                read(inline,x_should);
+                read(inline,y_should);
+                read(inline,w_should);
+                
+                assert to_integer(result) = int report integer'image(case_counter)&" :ASSERTION FAILED! RESULT testcase: "  & integer'image(int) & " but is: " & integer'image(to_integer(result)) severity WARNING;
+                
+                assert x_should = to_index.xindex report integer'image(case_counter)&" :ASSERTION FAILED! INDEX X testcase: "  & integer'image(x_should) & " but is: " & integer'image(to_index.xindex) severity WARNING;
+                assert y_should = to_index.yindex  report integer'image(case_counter)&" :ASSERTION FAILED!INDEX Y testcase: "  & integer'image(y_should) & " but is: " & integer'image(to_index.yindex) severity WARNING;
+                assert w_should = to_index.w  report integer'image(case_counter)&" :ASSERTION FAILED! W testcase: "  & integer'image(w_should) & " but is: " & integer'image(to_index.w) severity WARNING;
+                
+                if int = to_integer(result) then
+                    case_counter := case_counter + 1;
+                end if;
+                
+                readline(infile,inline);
+                read(inline,int);
+  
+            end if;
+            wait for CLK_PERIOD;
+        end loop;
+        report "passsed (result)"& integer'image(case_counter) & "/" & integer'image(final_count);
+        --wait for CLK_PERIOD *5;
+    end loop;
     --readin total number of results
     --as soon as encountering valid check with it
     wait;

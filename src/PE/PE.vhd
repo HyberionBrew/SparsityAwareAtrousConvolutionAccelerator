@@ -35,7 +35,7 @@ architecture arch of PE is
   signal write_from_bus  : std_logic;
   signal fetch_ifmaps,fetch_kernels_bus_to_index_select2    : std_logic;
   signal fetch_kernels,fetch_ifmaps_bus_to_index_select2   : std_logic;
-  signal bitvec_bus_to_index_select,bitvec_bus_to_index_select2        : std_logic_vector(MAX_BITVECS_WIDTH-1 downto 0);
+  signal bitvec_bus_to_index_select,bitvec_bus_to_index_select2  : std_logic_vector(MAX_BITVECS_WIDTH-1 downto 0);
 
 
   signal index: natural range 0 to 18-1;
@@ -47,10 +47,10 @@ architecture arch of PE is
   signal addr_kernel: natural range 0 to MAX_ADDR_KERNEL-1;
   signal addr_ifmap: natural range 0 to MAX_ADDR_IFMAP-1;
   
-  signal values : std_logic_vector(MEM_WIDTH-1 downto 0);
+  signal values : std_logic_vector(MAX_MEM_WIDTH-1 downto 0);
   signal ifmap_value,weight_value: std_logic_vector(DATA_WIDTH-1 downto 0);
   
-  signal zeroes:std_logic_vector(ZERO_WIDTH-1 downto 0);
+  signal zeroes:std_logic_vector(ZERO_WIDTH_KERNEL-1 downto 0);
   signal zero_ifmap_out, zero_kernel_out: std_logic_vector(DATA_WIDTH_ZEROS-1 downto 0);
   signal addr_kernel_zero : natural range 0 to KERNELS_PER_PE-1;
   
@@ -122,7 +122,7 @@ port map (
   ifmap_index_in    => index_to_index_comp,
   weight_index_in   => weight_index,
   kernel_number_in  => addr_kernel_zero,
-  to_index          => to_index,
+  to_index_out          => to_index,
   current_column_in => current_column,
   current_row_in    => current_row,
       valid_in => valid,
@@ -135,8 +135,8 @@ port map (
 
 value_extraction_i : entity work.value_extraction
 port map (
+    clk          => clk,
   reset        => reset,
-  clk          => clk,
   addr_kernel  => addr_kernel,
   addr_ifmap   => addr_ifmap,
   addr_kernel_zero => addr_kernel_zero,
@@ -153,8 +153,8 @@ port map (
 
 mult_unit_i : entity work.mult_unit
 port map (
+ clk           => clk,
   reset         => reset,
-  clk           => clk,
   weight_val_in => weight_value,
   ifmap_val_in  => ifmap_value,
   result        => result,
