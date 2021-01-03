@@ -26,7 +26,8 @@ entity bus_unit is
   fetch_ifmaps : out std_logic;
   fetch_kernels : out std_logic;
   bitvecs : out std_logic_vector(MAX_BITVECS_WIDTH-1 downto 0);
-  values : out std_logic_vector(MAX_MEM_WIDTH-1 downto 0)
+  values : out std_logic_vector(MAX_MEM_WIDTH-1 downto 0);
+  kernel_offset: out natural range 0 to MAX_KERNEL_OFFSET-1
   );
 end entity;
 
@@ -79,6 +80,15 @@ begin
         elsif new_kernels = '1' then
             zeroes <= extract_zeroes_kernel(bus_to_pe);
         end if;
+    end process;
+    
+    kernel_offset_forward: process(all)
+    begin
+        kernel_offset <=  0;
+        if new_kernels = '1' then
+            kernel_offset <= extract_kernel_offset(bus_to_pe);
+        end if;
+    
     end process;
     
     

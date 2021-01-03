@@ -24,7 +24,15 @@ package core_pck is
   constant KERNELS_PER_BUS_ACCESS : integer := KERNELS_PER_PE/WRITE_DEPTH; --to remove
 
   constant IFMAPS_PER_BUS_ACCESS : integer := IFMAPS_PER_PE/WRITE_DEPTH;--to remove
-  
+
+  --needed for crossbar
+  --constant PES_PER_GROUP: integer := 5;
+  --constant BRAMS_PER_ACCUMULATOR: integer := 17;
+ --- constant CROSSBAR_ADDRESS_WIDTH: integer := 5; --derivd from BRAMS_PER_ACCUMULATOR
+ -- constant CROSSBAR_TAG_WIDTH : integer :=9; --512 values = 1 BRAM
+  --constant DATA_WIDTH_RESULT : integer := (DATA_WIDTH+1) *2;
+  --constant FIFO_DEPTH : Integer := 10;
+
 
      --constant SHIFT_SIZE : integer := 9;
 

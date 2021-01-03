@@ -3,6 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use work.core_pck.all;
 use work.pe_pack.all;
+use work.pe_group_pck.all;
 use ieee.std_logic_misc.all; --for and_reduce
 
 entity index_comp is
@@ -17,9 +18,12 @@ entity index_comp is
     to_index_out: out INDEX_TYPE;
     current_column_in: in natural range 0 to MAX_X; --have to delay this
     current_row_in: in natural range 0 to MAX_Y; --have to also delay this
+    kernel_offset_in : in natural range 0 to MAX_KERNEL_OFFSET;
     valid_in : in std_logic;
     valid_out : out std_logic;
-    fetch_ifmap: in std_logic
+    fetch_ifmap: in std_logic;
+    fetch_kernel: in std_logic;
+    kernel_offset: out natural range 0 to MAX_KERNEL_OFFSET
   );
 end entity;
 
@@ -47,6 +51,9 @@ signal ifmap, ifmap_nxt: natural range 0 to IFMAPS_PER_PE-1;
 signal kernel_number_nxt, kernel_number: natural range 0 to KERNELS_PER_PE-1;
 signal delay_valid_nxt, delay_valid : delay_valid_type;
 
+
+signal kernel_offset_nxt: natural range 0 to MAX_KERNEL_OFFSET;
+
 begin
 
 sync : process(clk,reset)
@@ -54,7 +61,7 @@ begin
   if reset = '0' then
     current_column <= 0;
     current_row <= 0;
-        ifmap <= 0;
+    ifmap <= 0;
     kernel_number <= 0;
     kernel <=  0;
     delay_valid <= (others => '0');
@@ -69,17 +76,23 @@ begin
     kernel <= kernel_nxt;
     delay_valid <= delay_valid_nxt;
     to_index <= to_index_nxt;
+    kernel_offset <= kernel_offset_nxt;
+
   end if;
 end process;
 
 set_offset: process(all)
 begin
+    kernel_offset_nxt <= kernel_offset;
     current_column_nxt <= current_column;
     current_row_nxt <= current_row;
 
     if fetch_ifmap = '1' then
         current_column_nxt <= current_column_in;
         current_row_nxt <= current_row_in; 
+    end if;
+    if fetch_kernel = '1' then
+        kernel_offset_nxt <= kernel_offset_in;
     end if;
 end process;
 
@@ -123,4 +136,6 @@ begin
     to_index_nxt.xindex <= current_column+1;
   end if;
 end process;
+
+
 end architecture;

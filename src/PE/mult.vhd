@@ -3,6 +3,7 @@ use ieee.std_logic_1164.all; --do I need this?
 use ieee.numeric_std.all;
 use work.core_pck.all;
 use work.pe_pack.all;
+use work.pe_group_pck.all;
 
 entity mult_unit is
   port (
@@ -89,6 +90,7 @@ begin
     reg_ifmap_nxt <= to_signed(to_integer(unsigned(ifmap_val))-to_integer(unsigned(Z_index)),reg_ifmap_nxt'length);
 
     result <= signed(reg_weight) * signed(reg_ifmap); --result is signed
+    
    -- result_scale_nxt <= signed(result_mult)* signed(M0);
     --result <= round_away_from_zero(result_scale, n); --TODO!TODO!!!!!
     --result <= round_away_from_zero(result_scale,n)

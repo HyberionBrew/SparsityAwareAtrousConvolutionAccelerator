@@ -4,6 +4,7 @@ use ieee.std_logic_1164.all; --do I need this?
 use ieee.numeric_std.all;
 use work.pe_pack.all;
 use work.core_pck.all;
+use work.pe_group_pck.all;
 
 --use work.core_pack.all;
 
@@ -19,7 +20,8 @@ entity PE is
   bus_to_pe : in std_logic_vector(BUSSIZE-1 downto 0);
   result : out signed(DATA_WIDTH_RESULT-1 downto 0);
   to_index : out INDEX_TYPE;
-  valid_out : out std_logic
+  valid_out : out std_logic;
+  crossbar_packet : out crossbar_packet_in
   );
 
 end entity;
@@ -57,7 +59,7 @@ architecture arch of PE is
  signal weight_index : natural range 0 to KERNEL_BITVEC_SIZE-1;
  signal index_to_index_comp: natural range 0 to INDEX_MAX-1;
 
-   
+ signal kernel_offset,kernel_offset_reg : natural range 0 to MAX_KERNEL_OFFSET;
   
 begin
 
@@ -79,7 +81,8 @@ begin
     fetch_ifmaps    => fetch_ifmaps,
     fetch_kernels   => fetch_kernels,
     bitvecs         => bitvec_bus_to_index_select,
-    values          => values
+    values          => values,
+    kernel_offset   => kernel_offset
   );
 
   index_selection_i : entity work.index_selection
@@ -125,9 +128,13 @@ port map (
   to_index_out          => to_index,
   current_column_in => current_column,
   current_row_in    => current_row,
-      valid_in => valid,
-    valid_out => valid_out,
-  fetch_ifmap       => fetch_ifmaps
+  kernel_offset_in => kernel_offset,
+  valid_in => valid,
+  valid_out => valid_out,
+  fetch_ifmap       => fetch_ifmaps,
+  fetch_kernel => fetch_kernels,
+  kernel_offset => kernel_offset_reg
+ -- crossbar_packet => crossbar_packet
 );
 
 
@@ -162,7 +169,18 @@ port map (
   Z_index_in    => zero_ifmap_out
 );
 
-
-
+ 
+ comp_crossbar_packet : process(all)
+ variable tag_calc :integer := 0;   
+begin
+    crossbar_packet.address <= std_logic_vector(to_unsigned((to_index.yindex mod BRAMS_PER_ACCUMULATOR),crossbar_packet.address'length));
+    tag_calc := to_index.xindex + to_index.w*6 + kernel_offset_reg;
+    if to_index.yindex > BRAMS_PER_ACCUMULATOR-1 then
+        tag_calc := tag_calc + (BRAM_DEPTH/2) -1;
+    end if;
+    crossbar_packet.tag <= std_logic_vector(to_unsigned(tag_calc,crossbar_packet.tag'length)); 
+    crossbar_packet.valid <= valid_out;--consits of y and w, where w is the weight offset 
+    crossbar_packet.data <= std_logic_vector(result);
+end process;
 
 end architecture;

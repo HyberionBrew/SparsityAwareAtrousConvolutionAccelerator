@@ -3,6 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use work.core_pck.all;
 use work.pe_pack.all;
+use work.pe_group_pck.all;
 use std.textio.all;
 
 entity PE_tb is
@@ -20,6 +21,8 @@ architecture arch of PE_tb is
    signal to_index: INDEX_TYPE;
   signal valid: std_logic;
   signal stall: std_logic;
+  signal crossbar_packet : crossbar_packet_in;
+  
   function to_std_logic(c : character) return std_logic is
     variable sl : std_logic;
     begin
@@ -74,7 +77,8 @@ begin
     bus_to_pe       => bus_to_pe,
     result          => result,
     to_index        => to_index,
-    valid_out       => valid
+    valid_out       => valid,
+    crossbar_packet => crossbar_packet
   );
 
 

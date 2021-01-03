@@ -95,6 +95,8 @@ def create_kernel_test_case():
     
     zeroes = [Bits(uint=random.randint(0,28),length = 8).bin for i in range(BUS_ZEROS_KERNEL_VALUE)]
     
+    kernel_offs = [Bits(uint = 0,length = 9).bin]
+
     for bitvec in bitvec_kernel:
         BUS = str(bitvec) + BUS
     BUS = padd_with_u(6,BUS)
@@ -102,7 +104,10 @@ def create_kernel_test_case():
         BUS = str(data)+BUS
     for zero in zeroes:
         BUS = str(zero) +BUS
-    BUS = padd_with_u(17,BUS)
+    for offs in kernel_offs:
+       BUS = str(offs) +BUS
+    
+    BUS = padd_with_u(8,BUS)
     return BUS,data_kernel_number,zeroes
 
 
@@ -234,6 +239,7 @@ col = 2
 
 ifmap_str, ifmaps,zeroes1 = generate_ifmaps(col,row)
 kernel_str, allkernels, zeroesk1 = generate_kernels()
+
 print("GENERATE")
 print(len(ifmap_str))
 print(len(kernel_str))

@@ -13,12 +13,21 @@ package bus_unit_pck is
   function extract_zeroes_kernel(v: std_logic_vector) return std_logic_vector;
   function extract_current_column(v: std_logic_vector) return natural;
   function extract_current_row(v: std_logic_vector) return natural;
+  function extract_kernel_offset(v: std_logic_vector) return natural;
 end package;
 
 
-
 package body bus_unit_pck is
-
+ 
+  function extract_kernel_offset(v: std_logic_vector) return natural is
+    variable kernel_offset : natural range 0 to MAX_KERNEL_OFFSET-1;
+ begin
+    kernel_offset := to_integer(unsigned(v(BUS_KERNEL_OFFSET_OFFSET+ KERNEL_OFFSET_WIDTH downto BUS_KERNEL_OFFSET_OFFSET)));
+    return kernel_offset;
+ end function;
+ 
+ 
+ 
   function extract_bitvecs_ifmaps(v: std_logic_vector) return std_logic_vector is
     variable bitvecs: std_logic_vector(MAX_BITVECS_WIDTH-1 downto 0):= (others => '0');
  begin
