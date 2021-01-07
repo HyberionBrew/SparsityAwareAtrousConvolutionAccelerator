@@ -34,23 +34,6 @@ use work.pe_group_pck.all;
 
 package crossbar_pkg is
   --needed for crossbar
-
-type crossbar_packet_in is record
-	data : std_logic_vector(DATA_WIDTH_RESULT - 1 downto 0);
-	tag : std_logic_vector(CROSSBAR_TAG_WIDTH - 1 downto 0);
-	address : std_logic_vector(CROSSBAR_ADDRESS_WIDTH - 1 downto 0);
-	valid : std_logic;
-end record;
-
-type crossbar_packet_out is record
-	data : std_logic_vector(DATA_WIDTH_RESULT - 1 downto 0);
-	tag : std_logic_vector(CROSSBAR_TAG_WIDTH - 1 downto 0);
-	valid : std_logic;
-end record;
-
-type crossbar_packet_in_array is array (integer range <>) of crossbar_packet_in;
-type crossbar_packet_out_array is array(integer range <>) of crossbar_packet_out;
-
 component crossbar is
 	generic
 	(

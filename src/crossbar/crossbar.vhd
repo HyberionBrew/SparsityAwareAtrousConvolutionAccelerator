@@ -23,21 +23,24 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
+use IEEE.std_logic_misc.all;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-use work.common_pkg.all;
+--use work.common_pkg.all;
 use work.arbiter_pkg.all;
 use work.crossbar_pkg.all;
 use work.fifo_pkg.all;
+use work.pe_group_pck.all;
 
 entity crossbar is
 	generic
 	(
 		NUM_INPUTS : natural;	-- number of inputs
+		NUM_OUTPUTS: natural;
 		ADDR_WIDTH : natural;	-- number of bits for output addresses
 		TAG_WIDTH : natural;	-- number of bits for user tag
 		DATA_WIDTH : natural;	-- number of bits per data block
@@ -50,6 +53,7 @@ entity crossbar is
 		clk : in std_logic;
 		res : in std_logic;
 		valid_in : in std_logic;											-- master valid
+		empty_out    : out std_logic; --signals to pipeline that queues are empty
 		ready_in : in std_logic_vector(BRAMS_PER_ACCUMULATOR - 1 downto 0);		-- which outputs are ready
 		inputs : in crossbar_packet_in_array(NUM_INPUTS - 1 downto 0);--(data(DATA_WIDTH - 1 downto 0), tag(TAG_WIDTH - 1 downto 0), address(ADDR_WIDTH - 1 downto 0));	-- input data, tag, address and validity bit
 		stall_out : out std_logic_vector(NUM_INPUTS-1 downto 0);											-- whether the crossbar is ready to accept inputs
@@ -59,7 +63,7 @@ end crossbar;
 
 architecture beh of crossbar is
 
-	constant NUM_OUTPUTS : natural := BRAMS_PER_ACCUMULATOR;
+
 
 	-- direct requests and grants
 
@@ -90,7 +94,13 @@ architecture beh of crossbar is
     signal stall,stall_nxt: stall_delay_type;
 
 begin
-
+    empty_sig_out: process(all)
+    begin
+        empty_out <= AND_REDUCE(empty);
+    end process;
+    
+    
+    
 	arb : arbiter
 	generic map
 	(

@@ -174,9 +174,9 @@ port map (
  variable tag_calc :integer := 0;   
 begin
     crossbar_packet.address <= std_logic_vector(to_unsigned((to_index.yindex mod BRAMS_PER_ACCUMULATOR),crossbar_packet.address'length));
-    tag_calc := to_index.xindex + to_index.w*6 + kernel_offset_reg;
+    tag_calc := to_index.xindex + to_index.w*6;
     if to_index.yindex > BRAMS_PER_ACCUMULATOR-1 then
-        tag_calc := tag_calc + (BRAM_DEPTH/2) -1;
+        tag_calc := tag_calc + 6*6;
     end if;
     crossbar_packet.tag <= std_logic_vector(to_unsigned(tag_calc,crossbar_packet.tag'length)); 
     crossbar_packet.valid <= valid_out;--consits of y and w, where w is the weight offset 
