@@ -222,14 +222,15 @@ begin
      
 		-- operate crossbar
 		for i in 0 to NUM_INPUTS - 1 loop
-			for o in 0 to NUM_OUTPUTS - 1 loop
+			for o in 0 to 3 - 1 loop
 				-- set requests
 				if empty(i) = '0' and to_integer(unsigned(address(i))) = o then
 					requests(i)(o) <= '1';
 				end if;
 				-- consume inputs and redirect to outputs
 				if grants(i)(o) = '1' then
-					outputs(o) <= (data(i), tag(i), '1');--(data(i), tag(i), '1');
+				    --debug(o)<= to_integer(data(i)));
+					outputs(o) <= (std_logic_vector(data(i)), tag(i), '1');--(data(i), tag(i), '1');
 					rd_en(i) <= '1';
 				end if;
 			end loop;
