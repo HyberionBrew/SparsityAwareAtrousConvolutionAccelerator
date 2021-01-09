@@ -35,12 +35,11 @@ signal empty, finished : std_logic;
 signal bus_to_pe, bus_from_reg: std_logic_vector(BUSSIZE-1 downto 0);
 
 begin
-
 bus_driver_i : entity work.bus_driver
 port map (
-  clk             => clk,
+clk             => clk,
   reset           => reset,
-  bus_to_mem      => bus_to_mem,
+ bus_to_mem      => bus_to_mem,
   request_granted => out_enable,
   bus_to_pe       => bus_to_pe,
   bus_from_reg    => bus_from_reg,
@@ -67,7 +66,7 @@ PEs : for i in 0 to PES_PER_GROUP-1 generate
       to_index        => open, --deprectaed
       valid_out       => open, --deprcated
       crossbar_packet => crossbar_packet(I) --valid
-    );
+   );
     end generate;
     
 crossbar_i : entity work.crossbar 
@@ -79,7 +78,7 @@ crossbar_i : entity work.crossbar
       DATA_WIDTH   => DATA_WIDTH_RESULT,
       FIFO_DEPTH   => FIFO_DEPTH,
       FIFO_ALMOST_FULL => FIFO_MAX_DELAY+2, --DELAY +2
-      ENABLE_CYCLE => true--true
+      ENABLE_CYCLE => false--true
     )
     port map (
       clk       => clk, --done
@@ -89,37 +88,37 @@ crossbar_i : entity work.crossbar
       ready_in  => (others => '1'), --alway true
       inputs    => crossbar_packet, --done
       stall_out => stall,
-      outputs   => crossbar_packet_ou
+      outputs   => open--crossbar_packet_ou
     );
-
-
 
 accumulators_i : entity work.accumulators
 generic map (
-  NUM_INPUTS     => BRAMS_PER_ACCUMULATOR,
+ NUM_INPUTS     => BRAMS_PER_ACCUMULATOR,
   DEPTH          => KERNELS_PER_PE*6*2,--6 ist the max x-width! 2 is for two x values per array
-  ACC_DATA_WIDTH => 24,
-  DELAY_FINISHED_CLK => 2
+ ACC_DATA_WIDTH => 24,
+ DELAY_FINISHED_CLK => 2
 )
 port map (
   reset       => reset,
-  clk         => clk,
+ clk         => clk,
   inputs      => crossbar_packet_ou,
   request_bus => request_bus, --change TODO!
   finished    => finished,
   finished_out    => finished_out, --Delays the finished such that the accumulators are properly switched 
   out_enable  => out_enable,
   free        => free,
-  new_kernels => OR_REDUCE(new_kernels), --todo!
-  to_bus      => bus_from_reg --change
-
+ new_kernels => OR_REDUCE(new_kernels), --todo!
+ to_bus      => bus_from_reg --change
 );
+
 
 
 comp_finished: process(all)
 begin
   finished <= AND_REDUCE(finished_PE) and empty;
 end process;
+
+
 
 
 end architecture;

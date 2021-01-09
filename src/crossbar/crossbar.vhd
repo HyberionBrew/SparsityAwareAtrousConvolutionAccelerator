@@ -57,7 +57,7 @@ entity crossbar is
 		ready_in : in std_logic_vector(BRAMS_PER_ACCUMULATOR - 1 downto 0);		-- which outputs are ready
 		inputs : in crossbar_packet_in_array(NUM_INPUTS - 1 downto 0);--(data(DATA_WIDTH - 1 downto 0), tag(TAG_WIDTH - 1 downto 0), address(ADDR_WIDTH - 1 downto 0));	-- input data, tag, address and validity bit
 		stall_out : out std_logic_vector(NUM_INPUTS-1 downto 0);											-- whether the crossbar is ready to accept inputs
-		outputs : out crossbar_packet_out_array(BRAMS_PER_ACCUMULATOR - 1 downto 0)--(data(DATA_WIDTH - 1 downto 0), tag(TAG_WIDTH - 1 downto 0))	-- output data, tag and validity bit
+		outputs : out crossbar_packet_out_array(NUM_OUTPUTS - 1 downto 0)--(data(DATA_WIDTH - 1 downto 0), tag(TAG_WIDTH - 1 downto 0))	-- output data, tag and validity bit
 	);
 end crossbar;
 
@@ -86,6 +86,8 @@ architecture beh of crossbar is
 	-- signals instead of aliases because modelsim has problems with subslice aliases
 
 	signal data : data_type(NUM_INPUTS - 1 downto 0);
+	type debug_type is array(0 to 17) of std_logic_vector(18-1 downto 0);
+	signal debug : debug_type;
 	signal address : address_type(NUM_INPUTS - 1 downto 0);
 	signal tag : tag_type(NUM_INPUTS - 1 downto 0);
 
@@ -210,7 +212,7 @@ begin
 		requests <= (others => (others => '0'));
 		outputs <= (others => ((others => '-'), (others => '-'), '0'));
 		rd_en <= (others => '0');
-
+        debug <= (others => (others =>('-')));
 		-- calculate ready_out
 		--var_ready_out := '0';
 		--for i in 0 to NUM_INPUTS - 1 loop
@@ -227,7 +229,7 @@ begin
 				end if;
 				-- consume inputs and redirect to outputs
 				if grants(i)(o) = '1' then
-					outputs(o) <= (data(i), tag(i), '1');
+					outputs(o) <= (data(i), tag(i), '1');--(data(i), tag(i), '1');
 					rd_en(i) <= '1';
 				end if;
 			end loop;

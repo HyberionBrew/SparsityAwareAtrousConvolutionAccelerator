@@ -45,7 +45,7 @@ architecture arch of PE is
   signal valid: std_logic;
 
   signal ifmap_counter : natural range 0 to IFMAPS_PER_PE-1; --TODO!
-  signal kernel_counter : natural range 0 to 2-1;
+  signal kernel_counter : natural range 0 to KERNELS_PER_PE-1;
   signal addr_kernel: natural range 0 to MAX_ADDR_KERNEL-1;
   signal addr_ifmap: natural range 0 to MAX_ADDR_IFMAP-1;
   

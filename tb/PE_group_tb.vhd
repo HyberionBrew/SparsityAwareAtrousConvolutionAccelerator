@@ -105,7 +105,7 @@ PE_group_i : entity work.PE_group
     wait for CLK_PERIOD;
     reset <= '1';
     while not endfile(infile) loop
-        wait for CLK_PERIOD *4; --for free to be low again
+        wait for CLK_PERIOD *20; --for free to be low again
         if free= '1' and finished = '1' then
             readline(infile,inline);
             read(inline,int);

@@ -84,7 +84,7 @@ end process;
 
 delay_finished: process(all)
 begin
-    
+    finished_delay_nxt <= finished_delay;
    case(state) is 
     when LOADING_VALUES =>
         finished <= finished_delay(0);

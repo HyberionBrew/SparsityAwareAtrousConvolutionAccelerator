@@ -6,6 +6,7 @@ use IEEE.std_logic_misc.all;
 
 use work.pe_group_pck.all;
 use work.core_pck.all;
+use work.acc_bank_pkg.all;
 
 entity accumulators is
   generic(
@@ -30,127 +31,121 @@ entity accumulators is
 end entity;
 
 architecture arch of accumulators is
-  signal swap,swap_nxt: natural range 0 to 1;
-  type acc_reg_type is array(natural range 0 to 1, natural range 0 to NUM_INPUTS-1 ,natural range 0 to DEPTH-1) of signed(ACC_DATA_WIDTH-1 downto 0); --todo
-  signal acc_reg, acc_reg_nxt: acc_reg_type;
-  signal finish_detect,finish_detect_nxt: std_logic_vector(1 downto 0);
-  signal tag_out, tag_out_nxt : natural range 0 to DEPTH-1;
-    
-  signal out_values_available_nxt : std_logic;
-  signal swap_in_use,swap_in_use_nxt, finished_reg, finished_reg_nxt: std_logic_vector(1 downto 0);
-    signal out_enable_reg,out_enable_reg_nxt :std_logic;
-  signal delay_finished, delay_finished_nxt: std_logic_vector(DELAY_FINISHED_CLK downto 0);
-    
+
+constant FINISH_DELAY_CYC : integer := 4;
+signal finish_delay,finish_delay_nxt: std_logic_vector(FINISH_DELAY_CYC-1 downto 0);
+signal swap,swap_nxt: std_logic;
+signal finished_brams,finished_brams_nxt, free_brams,free_brams_nxt: std_logic_vector(1 downto 0);
+signal ready_out_brams: std_logic;
+signal zero: std_logic;
+signal rd_en: std_logic_vector(1 downto 0);
+signal rd_addr: addr_array;
+type data_array_rd_out is array (0 to NUM_INPUTS-1) of data_array;
+signal rd_data: data_array_rd_out;
+signal tag,tag_nxt : natural range 0 to 71; 
 begin
-  
-  delay_finito: process(all)
-  begin
-    delay_finished_nxt(DELAY_FINISHED_CLK) <= finished;
-    for i in 0 to DELAY_FINISHED_CLK-1 loop
-        delay_finished_nxt(I) <= delay_finished(I+1); 
-    end loop;
-    finished_out <= delay_finished(0);  
-  end process;
-  
-
-  sync : process(clk,reset)
-  begin
-    if reset = '0' then
-      acc_reg <= (others => (others => (others => (to_signed(0,ACC_DATA_WIDTH)))));
-      swap <= 0;
-      finish_detect <= "11";
-      swap_in_use <= "00";
-      finished_reg <= "00";
-      delay_finished <= (others => '0');
-      tag_out <= 0;
-    elsif rising_edge(clk) then
-     delay_finished <= delay_finished_nxt;
-      acc_reg <= acc_reg_nxt;
-      swap <= swap_nxt;
-      finish_detect <= finish_detect_nxt;
-      swap_in_use <= swap_in_use_nxt;
-      tag_out <= tag_out_nxt;
-      finished_reg <= finished_reg_nxt;
-      
-    end if;
-
-  end process;
-
-  state_m : process(all)
-  begin
-   
-  
-    finish_detect_nxt(1) <= finished;
-    finish_detect_nxt(0) <= finish_detect(1);
-    request_bus <= OR_REDUCE(finished_reg);
-    free  <= NAND_REDUCE(swap_in_use);
+  --signal swap,swap_nxt: natural range 0 to 1;
+    brams: for i in 0 to NUM_INPUTS-1 generate 
+        accumulator_bank_i : accumulator_bank
+            generic map (
+              ADDR_WIDTH   => 9,
+              RESULT_WIDTH => 24 --TODO!
+            )
+            port map (
+              clk       => clk,
+              res       => reset,
+              valid_in  => inputs(I).valid,
+              switch    => swap,
+              wr_addr   => inputs(I).tag,
+              wr_data   => inputs(I).data,
+              zero      => zero, --used for emptying
+              rd_en     => rd_en,
+              rd_addr   => rd_addr,
+              ready_out => open,
+              rd_data   => rd_data(I)
+            );
+      end generate;
     
-    if finish_detect(0) = '0' and finish_detect(1) = '1' then
-      if swap = 0 then
-        swap_nxt <= 1;
-      else
-        swap_nxt <= 0;
-      end if;
-    end if;
-  end process;
-  
-  
-
-  storage: process(all)
-  variable crossbar_pack: crossbar_packet_out;
-  variable tag: Integer;
-  variable swap_out: integer;
-  
-  begin
-    acc_reg_nxt <= acc_reg;
-    finished_reg_nxt <= finished_reg;
-    swap_in_use_nxt <= swap_in_use;
-    --out_enable_reg_nxt <= out_enable;
-    --request_bus <= OR_REDUCE(finished_reg);
-    to_bus <= (others => 'U');
-    tag_out_nxt <= 0;
-    for I in 0 to NUM_INPUTS-1 loop
-      crossbar_pack := inputs(I);
-      if crossbar_pack.valid = '1' then
-          tag := to_integer(unsigned(crossbar_pack.tag));
-          acc_reg_nxt(swap,I,tag) <= signed(crossbar_pack.data) + acc_reg(swap,I,tag);
-      end if;
-    end loop;
+   --delaing the finish for 3 Cycles in order not to harm current accumulation 
+    --i.e. not to soon switched
+    sync: process(all)
+    begin
+        if reset = '0' then
+            finish_delay <= (others => '1');
+            swap <= '0';
+            finished_brams <= "00";
+            free_brams <= "11";
+        elsif rising_edge(clk) then
+            finish_delay(FINISH_DELAY_CYC-1) <= finished;
+            swap <= swap_nxt;
+            tag <= tag_nxt;
+            finished_brams <= finished_brams_nxt;
+            free_brams <= free_brams_nxt;
+            --it isnt necessary because of ready_out but it doesnt hurt
+            for I in 0 to FINISH_DELAY_CYC-2 loop
+                finish_delay(I) <= finish_delay_nxt(I+1);
+            end loop;
+        end if;
+    end process;
     
-    --write the other swap out!    
-    swap_out := 0;
-     if swap = 0 then
-        swap_out := 1;
-     end if;
-
-     if out_enable = '1' and finished_reg(swap_out) = '1' then
-         --assert finished_reg(swap_out) = '1' report "Wants to swap out non finished registers!" severity ERROR;
-         
-         for I in 0 to NUM_INPUTS-1 loop
-            to_bus((ACC_DATA_WIDTH*(I+1))-1 downto ACC_DATA_WIDTH*I) <= std_logic_vector(acc_reg(swap_out,I,tag_out));
-            acc_reg_nxt(swap_out,I,tag_out) <=  to_signed(0,ACC_DATA_WIDTH);
-         end loop;
-         
-         if tag_out = DEPTH-1 then
-             tag_out_nxt <= 0;
-             finished_reg_nxt(swap_out) <= '0';
-             swap_in_use_nxt(swap_out) <= '0';
-             out_enable_reg_nxt <= '0';
-           --  request_bus <= '0';
-         else
-            tag_out_nxt <= tag_out + 1;
-         end if;
-     end if;
     
-      if finish_detect(0) = '0' and finish_detect(1) = '1' then
-        finished_reg_nxt(swap) <= '1';
-       end if;
+    read_brams: process(all)
+    
+    begin
+        to_bus <= (others => 'U');
+        tag_nxt <= 0;
+        rd_en <= "00";
         
-      if new_kernels = '1' then
-        swap_in_use_nxt(swap) <= '1';
-      end if;
+        if out_enable = '1' then
+            tag_nxt <= tag + 1;
+            rd_en <= "11";
+            rd_addr(0) <= std_logic_vector(to_unsigned(tag,rd_addr(0)'length));
+            rd_addr(1) <= std_logic_vector(to_unsigned(tag,rd_addr(0)'length));
+            for I in 1 to 17 loop
+                to_bus((ACC_DATA_WIDTH*I)-1 downto ACC_DATA_WIDTH*(I-1)) <=  rd_data(I-1)(0) ;
+            end loop;
+            if tag = 71 then
+                tag_nxt <= 0;
+            end if;
+        end if;
+                
+    end process;
+    --process for the switchero
+    switchero: process(all)
+    variable swap_var: integer;
+    begin
+            swap_nxt <= swap;
+            free_brams_nxt <= free_brams;
+            finished_brams_nxt <= finished_brams;
+            swap_var := 0;
+            if swap = '1' then
+                swap_var := 1;
+            end if;
+            finish_delay_nxt <= finish_delay;
+            if finish_delay(0) = '0' and finish_delay(1) = '1' then
+            --if a rising edge on finished is detected the current BRAMS are full and finished
+                finished_brams_nxt(swap_var) <= '1';
+                swap_nxt <= not(swap);
+                
+            end if;
+             --if a falling edge is detected it is no longer free ASAP
+            if finish_delay(FINISH_DELAY_CYC-2) = '1' and finish_delay(FINISH_DELAY_CYC-1) = '0' then
 
-
-  end process;
-
+                free_brams_nxt(swap_var) <= '0';
+            end if;    
+            --free() <= '0';
+    end process;
+    
+    output: process(all)
+    variable swap_var: integer;
+    begin
+        swap_var := 0;
+        if swap = '1' then
+            swap_var := 1;
+        end if;
+        finished_out <= free_brams(swap_var);--OR_REDUCE(finished_brams);
+        request_bus <= OR_REDUCE(finished_brams);
+        free <= OR_REDUCE(free_brams);
+    end process;
+    
 end architecture;
