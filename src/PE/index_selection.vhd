@@ -31,8 +31,8 @@ end entity;
 
 architecture arch of index_selection is
 
-   
-   
+
+
   signal weight_reg, weight_reg_nxt : MEM_BITVEC_KERNEL;
   signal ifmap_reg,ifmap_reg_nxt : MEM_BITVEC_IFMAP;
   signal ifmap_counter_nxt : natural range 0 to IFMAPS_PER_PE; -- TODO!
@@ -49,7 +49,7 @@ architecture arch of index_selection is
 
   signal active_kernels, active_kernels_nxt: ACTIVE_KERNEL_REGS;
 
-    
+
   constant FINISHED_DELAY_CYCLES : integer := 4;
   type finished_delay_type is array (0 to FINISHED_DELAY_CYCLES-1) of std_logic;
   signal finished_delay, finished_delay_nxt : finished_delay_type;
@@ -85,7 +85,7 @@ end process;
 delay_finished: process(all)
 begin
     finished_delay_nxt <= finished_delay;
-   case(state) is 
+   case(state) is
     when LOADING_VALUES =>
         finished <= finished_delay(0);
         if stall = '0' then
@@ -97,7 +97,7 @@ begin
     when others =>
         finished_delay_nxt <= (others => '0');
         finished <= '0';
-   end case;     
+   end case;
 
 
 end process;
@@ -125,14 +125,14 @@ begin
   kernel_counter_nxt <= kernel_counter;
   active_kernels_nxt <= active_kernels;
   bitvec_var := bitvec;
-  
+
   case(state) is
     --load new values
     when LOADING_VALUES =>
       if fetch_values_ifmap = '1' then
         for I in 1 to IFMAPS_PER_PE loop
              ifmap_reg_nxt(I-1) <= bitvec_in(VALUES_PER_IFMAP*I-1 downto VALUES_PER_IFMAP*(I-1));
-        end loop; 
+        end loop;
 
 
       elsif fetch_values_kernel = '1' then
@@ -141,10 +141,10 @@ begin
         end loop;
         state_nxt <= SET_NEW_ACTIVE_KERNEL;
       end if;
-      
-      
+
+
       kernel_counter_nxt <= 0;
-   
+
       shift_nxt <= 0;
       ifmap_counter_nxt <= 0;
       new_bitvec_nxt <= '1';
@@ -174,7 +174,7 @@ begin
       end if;
       --in the case no valid value will be extracted in the next cycle shift already here
       if valid_var = '0' and stall = '0' then
-        shift_nxt <= shift +1;
+
         new_bitvec_nxt <= '1';
         for I in 0 to SIMULTANEOUS_KERNELS-1 loop
           active_kernels_nxt(I) <= active_kernels(I) srl 1; --weight_reg(0),1)
@@ -183,17 +183,22 @@ begin
 
         if shift = 8 then
           shift_nxt <= 0;
-          ifmap_counter_nxt <= ifmap_counter + 1;
+
           if ifmap_counter = IFMAPS_PER_PE-1 then
-              kernel_counter_nxt <= kernel_counter +1;
+
               if kernel_counter = KERNEL_COUNTER_MAX-1 then
                 state_nxt <= LOADING_VALUES;
                 kernel_counter_nxt <= 0;
               else
+                kernel_counter_nxt <= kernel_counter +1;
                 state_nxt <= SET_NEW_ACTIVE_KERNEL;
               end if;
               ifmap_counter_nxt <= 0;
+          else
+             ifmap_counter_nxt <= ifmap_counter + 1;
           end if;
+        else
+           shift_nxt <= shift +1;
         end if;
       end if;
 

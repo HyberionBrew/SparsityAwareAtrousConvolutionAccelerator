@@ -52,6 +52,43 @@ PE_group_i : entity work.PE_group
     wait for CLK_PERIOD/2;
   end process;
 
+  check_out:process
+  variable should_prev: integer := 0;
+  variable out_enable_prev: std_logic;
+  variable report_counter :integer :=0;
+  begin
+    out_enable_prev := '0';
+    while true loop
+        if out_enable = '0' and out_enable_prev = '1' then
+             wait for CLK_PERIOD*5;
+             report_counter :=0;
+            for kernel in 0 to 5 loop
+                for x in 0 to 5 loop
+                    for y in 0 to 32 loop
+
+
+                        if not(mem_image_should(should_prev,kernel,x,y) = mem_image(kernel,x,y)) then
+                            report "ERROR " & integer'image(should_prev) & "kernel: " & integer'image(kernel) &" x: "& integer'image(x) & " y: "& integer'image(y);
+                            report "SHOULD;" & integer'image(mem_image_should(should_prev,kernel,x,y)) & " is: " & integer'image(mem_image(kernel,x,y));
+                            report_counter := report_counter +1;
+                        end if;
+
+                    end loop;
+                 end loop;
+              end loop;
+             report "NUMBER OF ERRORS: " & integer'image(report_counter);
+             if should_prev= 1 then
+                should_prev := 0;
+             else
+                  should_prev := 1;
+             end if;
+          end if;
+
+          out_enable_prev := out_enable;
+          wait for CLK_PERIOD/2;
+        end loop;
+
+  end process;
 
 
   stim: process
@@ -65,10 +102,10 @@ PE_group_i : entity work.PE_group
     new_kernels <= (others => '0');
     new_ifmaps <= (others => '0');
     bus_to_mem <= (others => 'Z');
-    wait for CLK_PERIOD;
+    wait for CLK_PERIOD*100;
     reset <= '1';
     while not endfile(infile) loop
-        wait for CLK_PERIOD *10; --for free to be low again
+        wait for CLK_PERIOD *20; --for free to be low again
         if free= '1' and finished = '1' then
             readline(infile,inline);
             read(inline,int);
@@ -130,9 +167,8 @@ PE_group_i : entity work.PE_group
   --      end loop;
    --     new_kernels <= (others => '0');
     --    bus_to_mem <= (others => 'Z');
-    --    end if;
+        end if;
         wait for CLK_PERIOD;
-      end if;
     end loop;
     wait;
 
@@ -140,6 +176,8 @@ PE_group_i : entity work.PE_group
     --first get N ifmaps (for each PE)
     --then get 1 kernel write it to all PEs
   end process;
+
+
   bus_decode: process
 
   begin
@@ -151,22 +189,15 @@ PE_group_i : entity work.PE_group
 
   create_mem_image: process
   variable curr_y, curr_x,kernel : integer;
-  variable go: std_logic := '0';
   begin
     curr_y := 0;
     curr_x := 0;
     kernel := 0;
     mem_image <= (others => (others => (others => 0)));
-  --  wait for CLK_PERIOD/2;
+    wait for CLK_PERIOD/2;
     while true loop
-        if out_enable = '1' and go = '0' then
-          go := '1';
-          wait for CLK_PERIOD;
-        elsif out_enable = '0' then
-          go := '0';
-        end if;
-        if go = '1' then
-
+        if out_enable = '1' then
+           -- wait for CLK_PERIOD;
             for I in 1 to 17 loop
                 mem_image(kernel,curr_x,curr_y+I-1)<= to_integer(signed(bus_to_mem(24*I-1 downto 24*(I-1))));
             end loop;
@@ -188,7 +219,6 @@ PE_group_i : entity work.PE_group
 
             end if;
         end if;
-
     wait for CLK_PERIOD;
     end loop;
     wait for CLK_PERIOD;
@@ -206,14 +236,20 @@ PE_group_i : entity work.PE_group
        out_enable <= '0';
         wait for CLK_PERIOD*3;
         if request_bus = '1' then
-          wait for CLK_PERIOD * 100;
-          out_enable <= '1';
-          wait for CLK_PERIOD*(72+2);
-          out_enable <= '0';
-      end if;
+        wait for CLK_PERIOD * 100;
+        while request_bus = '1' loop
+            out_enable <= '1';
+            tag := tag + 1;
+            if tag = 73 then
+
+                exit;
+            end if;
+          wait for CLK_PERIOD;
+         end loop;
+        end if;
+      wait for CLK_PERIOD;
   end loop;
   end process;
-
 
 
 end architecture;

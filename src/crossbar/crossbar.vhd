@@ -67,7 +67,7 @@ architecture beh of crossbar is
 
 	-- direct requests and grants
 
-	
+
 	signal requests : slv_out_type(NUM_INPUTS - 1 downto 0);
 	signal grants : slv_out_type(NUM_INPUTS - 1 downto 0);
 
@@ -100,9 +100,9 @@ begin
     begin
         empty_out <= AND_REDUCE(empty);
     end process;
-    
-    
-    
+
+
+
 	arb : arbiter
 	generic map
 	(
@@ -146,8 +146,8 @@ begin
 			grants <= grants_cyc;
 		end generate;
 	end generate;
-    
-    
+
+
 	-- only necessary with ENABLE_CYCLE
 	en_cycle : if ENABLE_CYCLE generate
 		sync : process(all)
@@ -183,16 +183,16 @@ begin
 			end loop;
 		end process;
 	end generate;
-	
+
 	stall_sync : process(all)
 	begin
 	   if res = RESET then
 	       stall <= (others => (others =>'0'));
 	   elsif rising_edge(clk) then
 		  stall <= stall_nxt;
-		end if;			
+		end if;
 	end process;
-	
+
 	stall_output: process(all)
 	begin
 	   stall_out <= stall_en;
@@ -201,8 +201,8 @@ begin
 	  --     stall_nxt(I) <= stall(I+1);
 	   --    stall_nxt(I) <= stall(I+1);
 	  -- end loop;
-	   
-	   
+
+
 	end process;
 
 	output : process(all)
@@ -212,17 +212,17 @@ begin
 		requests <= (others => (others => '0'));
 		outputs <= (others => ((others => '-'), (others => '-'), '0'));
 		rd_en <= (others => '0');
-        debug <= (others => (others =>('-')));
+    debug <= (others => (others =>('-')));
 		-- calculate ready_out
 		--var_ready_out := '0';
 		--for i in 0 to NUM_INPUTS - 1 loop
 		--	var_ready_out := (full(i) and inputs(i).valid) or var_ready_out;
 		--end loop;
 		--ready_out <= not var_ready_out;
-     
+
 		-- operate crossbar
 		for i in 0 to NUM_INPUTS - 1 loop
-			for o in 0 to 3 - 1 loop
+			for o in 0 to NUM_OUTPUTS - 1 loop
 				-- set requests
 				if empty(i) = '0' and to_integer(unsigned(address(i))) = o then
 					requests(i)(o) <= '1';

@@ -15,13 +15,10 @@ entity bus_unit is
   new_ifmaps : in std_logic;
   new_kernels : in std_logic;
   bus_to_pe : in std_logic_vector(BUSSIZE-1 downto 0);
-  want_new_values: out std_logic;
-  bitvec : out std_logic; --the new bitvectors
   current_row : out natural range 0 to IFMAP_ROWS_TILED-1; --33
   current_column : out natural range 0 to IFMAP_COLUMNS_TILED-1; --6
   zeroes : out std_logic_vector (ZERO_WIDTH_KERNEL-1 downto 0);
   --zero_weights : out ZERO_POINT_KERNEL_ARRAY;
-  write_from_bus : out std_logic;
   -- only for index_select
   fetch_ifmaps : out std_logic;
   fetch_kernels : out std_logic;

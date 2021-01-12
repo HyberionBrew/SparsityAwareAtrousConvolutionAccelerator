@@ -68,8 +68,8 @@ PEs : for i in 0 to PES_PER_GROUP-1 generate
       crossbar_packet => crossbar_packet(I) --valid
    );
     end generate;
-    
-crossbar_i : entity work.crossbar 
+
+crossbar_i : entity work.crossbar
     generic map (
       NUM_INPUTS   => PES_PER_GROUP,
       NUM_OUTPUTS  => BRAMS_PER_ACCUMULATOR,
@@ -78,7 +78,7 @@ crossbar_i : entity work.crossbar
       DATA_WIDTH   => DATA_WIDTH_RESULT,
       FIFO_DEPTH   => FIFO_DEPTH,
       FIFO_ALMOST_FULL => FIFO_MAX_DELAY+2, --DELAY +2
-      ENABLE_CYCLE => false--true
+      ENABLE_CYCLE => true--true
     )
     port map (
       clk       => clk, --done
@@ -88,7 +88,7 @@ crossbar_i : entity work.crossbar
       ready_in  => (others => '1'), --alway true
       inputs    => crossbar_packet, --done
       stall_out => stall,
-      outputs   => open--crossbar_packet_ou
+      outputs   => crossbar_packet_ou
     );
 
 accumulators_i : entity work.accumulators
@@ -104,10 +104,9 @@ port map (
   inputs      => crossbar_packet_ou,
   request_bus => request_bus, --change TODO!
   finished    => finished,
-  finished_out    => finished_out, --Delays the finished such that the accumulators are properly switched 
+  finished_out    => finished_out, --Delays the finished such that the accumulators are properly switched
   out_enable  => out_enable,
   free        => free,
- new_kernels => OR_REDUCE(new_kernels), --todo!
  to_bus      => bus_from_reg --change
 );
 

@@ -39,7 +39,7 @@ type delay_to_index is array (0 to INDEX_DELAY_CYCLES) of INDEX_TYPE;
 signal current_column, current_column_nxt : natural range 0 to MAX_X;
 signal current_row, current_row_nxt : natural range 0 to MAX_Y;
 
-signal to_index_nxt, to_index: INDEX_TYPE; 
+signal to_index_nxt, to_index: INDEX_TYPE;
 
 type delay_kernel_number is array(0 to DELAY_CYCLES_IN) of natural range 0 to KERNELS_PER_PE-1;
 type delay_weight_index is array(0 to DELAY_CYCLES_IN) of natural range 0 to KERNEL_BITVEC_SIZE-1;
@@ -59,9 +59,9 @@ begin
 sync : process(clk,reset)
 begin
   if reset = '0' then
-    current_column <= 0;
-    current_row <= 0;
-    ifmap <= 0;
+    current_column <= 2;
+    current_row <= 12;
+    ifmap <= 3;
     kernel_number <= 0;
     kernel <=  0;
     delay_valid <= (others => '0');
@@ -89,7 +89,7 @@ begin
 
     if fetch_ifmap = '1' then
         current_column_nxt <= current_column_in;
-        current_row_nxt <= current_row_in; 
+        current_row_nxt <= current_row_in;
     end if;
     if fetch_kernel = '1' then
         kernel_offset_nxt <= kernel_offset_in;
@@ -105,7 +105,7 @@ begin
     kernel_number_nxt <= kernel_number_in;
     delay_valid_nxt(DELAY_CYCLES_VALID) <= valid_in;
 
-     for I in 0 to DELAY_CYCLES_VALID-1 loop 
+     for I in 0 to DELAY_CYCLES_VALID-1 loop
         delay_valid_nxt(I)<= delay_valid(I+1);
     end loop;
     valid_out <= delay_valid(0);
@@ -115,27 +115,29 @@ end process;
 windex : process(all)
 begin
   to_index_out <= to_index;
-  to_index_nxt.w<= kernel_number;  
+  to_index_nxt.w<= kernel_number;
   to_index_nxt.yindex <= 0;
   to_index_nxt.xindex <= 0;
+  if delay_valid(1) = '1' then
+    if kernel = 0 or kernel = 1 or kernel = 2 then
+      to_index_nxt.yindex <= current_row+ ifmap -6;
+    elsif kernel=3 or kernel = 4 or kernel = 5 then
+      to_index_nxt.yindex <= ifmap + current_row;
+    else
+      to_index_nxt.yindex <= ifmap + 6 + current_row ;
+    end if;
+
+
+    if kernel = 0 or kernel = 3 or kernel = 6 then
+      to_index_nxt.xindex <= current_column-1;
+    elsif kernel=1 or kernel = 4 or kernel = 7 then
+      to_index_nxt.xindex <= current_column;
+    else
+      to_index_nxt.xindex <= current_column+1;
+    end if;
+  end if;
   
-  if kernel = 0 or kernel = 1 or kernel = 2 then
-    to_index_nxt.yindex <= current_row+ ifmap -6;
-  elsif kernel=3 or kernel = 4 or kernel = 5 then
-    to_index_nxt.yindex <= ifmap + current_row;
-  else
-    to_index_nxt.yindex <= ifmap + 6 + current_row ;
-  end if;
-
-
-  if kernel = 0 or kernel = 3 or kernel = 6 then
-    to_index_nxt.xindex <= current_column-1;
-  elsif kernel=1 or kernel = 4 or kernel = 7 then
-    to_index_nxt.xindex <= current_column;
-  else
-    to_index_nxt.xindex <= current_column+1;
-  end if;
-end process;
+  end process;
 
 
 end architecture;

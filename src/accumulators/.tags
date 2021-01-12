@@ -1,0 +1,28 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	0	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+acc_bank_pkg	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/acc_bank_pkg.vhd	/^package acc_bank_pkg is$/;"	package	line:5
+ADDR_WIDTH	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/acc_bank_pkg.vhd	/^	constant ADDR_WIDTH: integer:= 9; --for 72 max  --TODO IMPORT FROM PARENT$/;"	constant	line:6
+ACC_WIDTH	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/acc_bank_pkg.vhd	/^	constant ACC_WIDTH: integer := 24;		$/;"	constant	line:7
+addr_array	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/acc_bank_pkg.vhd	/^	type addr_array is array(1 downto 0) of std_logic_vector(ADDR_WIDTH-1 downto 0);$/;"	type	line:8
+data_array	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/acc_bank_pkg.vhd	/^	type data_array is array(1 downto 0) of std_logic_vector(ACC_WIDTH-1 downto 0);$/;"	type	line:9
+accumulator_bank	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/accumulator_bank.vhd	/^entity accumulator_bank is$/;"	entity	line:35
+op_data	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/accumulator_bank.vhd	/^	type op_data is record$/;"	type	line:81
+valid	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/accumulator_bank.vhd	/^	type op_data is record$/;"	record	line:81
+write_buffer	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/accumulator_bank.vhd	/^		valid : std_logic;$/;"	record	line:82
+wr_addr	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/accumulator_bank.vhd	/^		write_buffer : integer range 0 to 1;$/;"	record	line:83
+op_data_array	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/accumulator_bank.vhd	/^	type op_data_array is array(integer range <>) of op_data;$/;"	type	line:86
+ram_forward_type	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/accumulator_bank.vhd	/^	type ram_forward_type is record$/;"	type	line:89
+valid	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/accumulator_bank.vhd	/^	type ram_forward_type is record$/;"	record	line:89
+data	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/accumulator_bank.vhd	/^		valid : std_logic;$/;"	record	line:90
+wr_data_delay_type	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/accumulator_bank.vhd	/^	type wr_data_delay_type is array(2 downto 0) of std_logic_vector(18-1 downto 0);$/;"	type	line:95
+valid_delay_type	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/accumulator_bank.vhd	/^    type valid_delay_type is array(2 downto 0) of std_logic;$/;"	type	line:97
+block_ram_pkg	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/block_ram_pkg.vhd	/^package block_ram_pkg is$/;"	package	line:34
+accumulators	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/accumulator.vhd	/^entity accumulators is$/;"	entity	line:11
+FINISH_DELAY_CYC	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/accumulator.vhd	/^constant FINISH_DELAY_CYC : integer := 4; --needed for the current BRAMS to finish their writing$/;"	constant	line:34
+data_array_rd_out	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/accumulator.vhd	/^type data_array_rd_out is array (0 to NUM_INPUTS-1) of data_array;$/;"	type	line:42
+block_ram	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/block_ram.vhd	/^entity block_ram is$/;"	entity	line:35
+ram_type	/home/fabian/Documents/Bachelorarbeit/VHDL/src/accumulators/block_ram.vhd	/^	type ram_type is array(2 ** ADDR_WIDTH - 1 downto 0) of std_logic_vector(DATA_WIDTH - 1 downto 0);$/;"	type	line:60

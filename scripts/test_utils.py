@@ -254,12 +254,12 @@ def write_pe_group_testcase(filename, ifmaps_strs,kernel_str, mem, op = "a", ker
 
 
     for kernel in range(mem.shape[0]):
+        print(mem[kernel])
         for x in range(mem.shape[2]):
             for y in range(mem.shape[1]):
                 mem_str = mem_str + str(int(mem[kernel][y][x])) + " "
             mem_str = mem_str + '\n'
     f.write(mem_str+ '\n')
-
 
 
 def write_test_case(filename, ifmap_str, kernel_str, result, out_index, op = "a", kernel_only = False):

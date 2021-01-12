@@ -51,9 +51,9 @@ component crossbar is
 		res : in std_logic;
 		valid_in : in std_logic;											-- master valid
 		ready_in : in std_logic_vector(2 ** ADDR_WIDTH - 1 downto 0);		-- which outputs are ready
-		inputs : in crossbar_packet_in_array(NUM_INPUTS - 1 downto 0)(data(DATA_WIDTH - 1 downto 0), tag(TAG_WIDTH - 1 downto 0), address(ADDR_WIDTH - 1 downto 0));	-- input data, tag, address and validity bit
+		inputs : in crossbar_packet_in_array(NUM_INPUTS - 1 downto 0);	-- input data, tag, address and validity bit
 		ready_out : out std_logic;											-- whether the crossbar is ready to accept inputs
-		outputs : out crossbar_packet_out_array(2 ** ADDR_WIDTH - 1 downto 0)(data(DATA_WIDTH - 1 downto 0), tag(TAG_WIDTH - 1 downto 0))	-- output data, tag and validity bit
+		outputs : out crossbar_packet_out_array(2 ** ADDR_WIDTH - 1 downto 0)	-- output data, tag and validity bit
 	);
 end component;
 
