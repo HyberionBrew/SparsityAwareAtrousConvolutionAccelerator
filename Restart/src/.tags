@@ -1,0 +1,21 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	0	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+core_pack	/home/fabian/Documents/Bachelorarbeit/VHDL/src/core_pack.vhd	/^package core_pack is$/;"	package	line:3
+BUS_WIDTH_BITS	/home/fabian/Documents/Bachelorarbeit/VHDL/src/core_pack.vhd	/^  constant BUS_WIDTH_BITS : integer := 500; --TODO! set$/;"	constant	line:4
+FINISHED_IFMAPS_SIGNAL_SIZE	/home/fabian/Documents/Bachelorarbeit/VHDL/src/core_pack.vhd	/^  constant FINISHED_IFMAPS_SIGNAL_SIZE : integer := 5;$/;"	constant	line:5
+PE_PSUM_SIZE	/home/fabian/Documents/Bachelorarbeit/VHDL/src/core_pack.vhd	/^  constant PE_PSUM_SIZE : integer := FINISHED_IFMAPS_SIGNAL_SIZE**2; --3$/;"	constant	line:8
+PE_INDEX_BITVEC_SIZE	/home/fabian/Documents/Bachelorarbeit/VHDL/src/core_pack.vhd	/^  constant PE_INDEX_BITVEC_SIZE : integer := 6;$/;"	constant	line:9
+PE_IFMAP_BITVEC	/home/fabian/Documents/Bachelorarbeit/VHDL/src/core_pack.vhd	/^  constant PE_IFMAP_BITVEC : integer := 6;$/;"	constant	line:10
+PE_WEIGHT_BITVEC	/home/fabian/Documents/Bachelorarbeit/VHDL/src/core_pack.vhd	/^  constant PE_WEIGHT_BITVEC : integer := 9;$/;"	constant	line:11
+PE_SHIFT_SIZE	/home/fabian/Documents/Bachelorarbeit/VHDL/src/core_pack.vhd	/^  constant PE_SHIFT_SIZE: integer := 5; --2⁵ = 16 I need 9 shifts$/;"	constant	line:12
+Priority_Encoder_In	/home/fabian/Documents/Bachelorarbeit/VHDL/src/core_pack.vhd	/^  constant Priority_Encoder_In: integer := 6;$/;"	constant	line:14
+Priority_Encoder_out	/home/fabian/Documents/Bachelorarbeit/VHDL/src/core_pack.vhd	/^  constant Priority_Encoder_out: integer :=3 ;$/;"	constant	line:15
+Priority_Encoder	/home/fabian/Documents/Bachelorarbeit/VHDL/src/priority_encoder.vhd	/^entity Priority_Encoder is$/;"	entity	line:8
+index_select	/home/fabian/Documents/Bachelorarbeit/VHDL/src/index_select.vhd	/^entity index_select is$/;"	entity	line:11
+State_type	/home/fabian/Documents/Bachelorarbeit/VHDL/src/index_select.vhd	/^TYPE State_type IS (STATE_NEW_BITVECS, STATE_CURRENT_BITVECS, VALID_BITVECS);  -- Define the states$/;"	type	line:24
+bits_set_two_or_more	/home/fabian/Documents/Bachelorarbeit/VHDL/src/index_select.vhd	/^function bits_set_two_or_more(v : std_logic_vector) return std_logic is$/;"	function	line:39
+PE	/home/fabian/Documents/Bachelorarbeit/VHDL/src/PE.vhd	/^entity PE is$/;"	entity	line:8
