@@ -6,6 +6,9 @@ VHDL_FILES = \
 	../src/pe_pck.vhd\
 	../src/PE/fetch_unit_pck.vhd\
 	../src/PE/fetch_unit.vhd\
+	../src/PE/index_comp_unit.vhd\
+	../src/PE/mult_unit.vhd\
+	../src/PE/value_extract_unit.vhd\
 	../src/PE/PE.vhd
 
 

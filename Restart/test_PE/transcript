@@ -1,6 +1,6 @@
 # vsim PE_tb -t 1ps -msgmode both
 # vsim PE_tb -t 1ps -msgmode both 
-# Start time: 10:35:14 on Jan 19,2021
+# Start time: 13:23:42 on Jan 19,2021
 # Loading std.standard
 # Loading std.textio(body)
 # Loading ieee.std_logic_1164(body)
@@ -10,9 +10,12 @@
 # Loading work.test_utils(body)
 # Loading work.pe_tb(arch)
 # Loading work.fetch_unit_pck(body)
+# Loading synopsys.attributes
+# Loading ieee.std_logic_misc(body)
 # Loading work.pe(arch)
 # Loading work.fetch_unit(arch)
+# Loading work.value_extract_unit(arch)
+# Loading work.mult_unit(arch)
+# Loading work.index_comp(arch)
 #  do ./wave.do
 #  run 10000 ns
-# End time: 10:35:29 on Jan 19,2021, Elapsed time: 0:00:15
-# Errors: 0, Warnings: 0

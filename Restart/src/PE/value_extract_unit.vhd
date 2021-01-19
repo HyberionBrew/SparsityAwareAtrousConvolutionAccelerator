@@ -10,7 +10,7 @@ port(
   reset: in std_logic;
   index: in natural range 0 to INDEX_MAX-1;--EXTRACTION_WIDTH-1;
   shift: in natural range 0 to SHIFT_MAX-1;
-  kernel_number: in natural range 0 to KERNELS_PER_PE-1;
+  kernel_number: in natural range 0 to 1;
   valid_in: in std_logic;
   valid_out: out std_logic;
   new_kernels : in std_logic;
@@ -22,20 +22,22 @@ port(
   ifmap : out unsigned(DATA_WIDTH-1 downto 0);
   weight: out signed(DATA_WIDTH-1 downto 0);
   zero_ifmap_new : in unsigned(DATA_WIDTH-1 downto 0);
-  zero_kernel_new: in signed(DATA_WIDTH-1 downto 0)
-
+  zero_kernel_new: in unsigned(DATA_WIDTH-1 downto 0);
+  norm_ifmap: out natural range 0 to INDEX_MAX-1;
+  norm_kernel: out natural range 0 to VALUES_PER_KERNEL-1
 );
 end entity;
 
 
 architecture arch of value_extract_unit is
   signal kernel_values_reg,kernel_values_reg_nxt: kernel_values_type;
-  signal ifmap_values_reg, ifmap_bitvecs_reg_nxt: ifmap_values_type;
+  signal ifmap_values_reg, ifmap_values_reg_nxt: ifmap_values_type;
   signal zero_ifmap_nxt, zero_ifmap: unsigned(DATA_WIDTH-1 downto 0);
   signal zero_kernel_nxt, zero_kernel: unsigned(DATA_WIDTH-1 downto 0);
   signal valid_intern: std_logic;
   signal shift_intern: natural range 0 to SHIFT_MAX-1;
   signal index_intern: natural range 0 to INDEX_MAX-1;
+  signal kernel_number_intern: natural range 0 to 1;
 begin
 
   sync : process(clk,reset)
@@ -45,12 +47,15 @@ begin
       index_intern <= 0;
       shift_intern <= 0;
       kernel_number_intern <= 0;
-
+      ifmap_values_reg <= (others => (others => (others => '0')));
+      kernel_values_reg <= (others => (others => (others => '0')));
     elsif rising_edge(clk) then
       valid_intern <= valid_in;
       index_intern <= index;
       shift_intern <= shift;
       kernel_number_intern <= kernel_number;
+      ifmap_values_reg <= ifmap_values_reg_nxt;
+      kernel_values_reg <= kernel_values_reg_nxt;
     end if;
   end process;
 --needs to save new values
@@ -61,8 +66,7 @@ begin
   variable kernel_pos: natural range 0 to VALUES_PER_KERNEL-1;
   begin
     --default
-    ifmap <= (others => '0');
-    kernel <= (others => '0');
+    weight <= (others => '0');
     ifmap <= (others => '0');
     zero_point_weight <= (others => '0');
     zero_point_ifmap <= (others => '0');
@@ -78,7 +82,7 @@ begin
     else
       kernel_number_clc := 0;
     end if;
-    if kernel_number_intern = '1' then
+    if kernel_number_intern = 1 then
       kernel_number_clc := kernel_number_clc +3;
     end if;
 
@@ -86,11 +90,13 @@ begin
     kernel_pos := (shift_intern + ifmap_pos) mod VALUES_PER_KERNEL;
 
     if valid_intern = '1' then
-      ifmap <= ifmap_values(kernel_number_clc,ifmap_pos);
-      kernel <= ifmap_values(kernel_number_clc,kernel_pos);
+      ifmap <= ifmap_values_reg(kernel_number_clc,ifmap_pos);
+      weight <= kernel_values_reg(kernel_number_clc,kernel_pos);
       zero_point_weight <= zero_kernel;
       zero_point_ifmap <= zero_ifmap;
       valid_out <= '1';
+      norm_ifmap <= ifmap_pos;
+      norm_kernel <= kernel_pos;
     end if;
 
   end process;
@@ -101,6 +107,7 @@ begin
   if new_kernels = '1' then
     zero_kernel_nxt <= zero_kernel_new;
     kernel_values_reg_nxt <= kernel_values;
+  end if;
   if new_ifmaps = '1' then
     zero_ifmap_nxt <= zero_ifmap_new;
     ifmap_values_reg_nxt <= ifmap_values;

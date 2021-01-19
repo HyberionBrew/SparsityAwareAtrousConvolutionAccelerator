@@ -8,11 +8,11 @@ entity mult_unit is
   port (
   clk : in std_logic;
   reset: in std_logic;
-  weight : in std_logic_vector(DATA_WIDTH-1 downto 0);
-  ifmap_value : in std_logic_vector(DATA_WIDTH-1 downto 0);
+  weight : in signed(DATA_WIDTH-1 downto 0);
+  ifmap_value : in unsigned(DATA_WIDTH-1 downto 0);
   result_out : out signed(DATA_WIDTH_RESULT-1 downto 0);
-  zero_point_weight : in std_logic_vector(DATA_WIDTH_ZEROS-1 downto 0); --of the QType =  uint8
-  zero_point_ifmap : in std_logic_vector(DATA_WIDTH_ZEROS-1 downto 0)
+  zero_point_weight : in unsigned(DATA_WIDTH-1 downto 0); --of the QType =  uint8
+  zero_point_ifmap : in unsigned(DATA_WIDTH-1 downto 0);
   valid: in std_logic
   );
 end entity;
@@ -46,7 +46,7 @@ begin
       reg_weight <= reg_weight_nxt;
       reg_ifmap <= reg_ifmap_nxt;
       result <= result_nxt;
-      valid_delay(0) <= valid_in;
+      valid_delay(0) <= valid;
       valid_delay(1) <= valid_delay(0);
     end if;
   end process;
@@ -60,14 +60,14 @@ begin
     reg_weight_nxt <= (others => '-');
     reg_ifmap_nxt <= (others => '-');
     result_nxt <= (others => '-');
-    result_out <= '0';
+    result_out <= (others => '-');
 
     if valid = '1' then
       reg_weight_nxt <= to_signed(to_integer(kernel_val)-to_integer(Z_weight), reg_weight_nxt'length);
       reg_ifmap_nxt <= to_signed(to_integer(ifmap_val)-to_integer(Z_index),reg_ifmap_nxt'length);
     end if;
     if valid_delay(0) = '1' then
-      result_nxt <= reg_weight) * reg_ifmap; --result is signed
+      result_nxt <= reg_weight * reg_ifmap; --result is signed
     end if;
     if valid_delay(1) = '1' then
       result_out <= result;

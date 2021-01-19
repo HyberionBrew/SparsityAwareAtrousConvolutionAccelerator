@@ -19,10 +19,10 @@ entity PE is
   kernel_bitvecs: in kernel_bitvecs_type;
   ifmap_bitvecs: in ifmap_bitvecs_type;
   kernel_values: in kernel_values_type;
-  ifmap_values: in ifmap_values_type
+  ifmap_values: in ifmap_values_type;
   zero_ifmap_new : in unsigned(DATA_WIDTH-1 downto 0);
-  zero_kernel_new: in signed(DATA_WIDTH-1 downto 0)
-
+  zero_kernel_new: in unsigned(DATA_WIDTH-1 downto 0);
+  current_row: in natural range 0 to MAX_Y-1
 );
 end PE;
 
@@ -37,6 +37,8 @@ architecture arch of PE is
   signal ifmap_value: unsigned(DATA_WIDTH-1 downto 0);
   signal weight: signed(DATA_WIDTH-1 downto 0);
   signal result: signed(DATA_WIDTH_RESULT-1 downto 0);
+  signal norm_ifmap, norm_kernel: natural;
+  signal index_to_acc: INDEX_TYPE;
 begin
 
 
@@ -78,8 +80,11 @@ begin
     ifmap             => ifmap_value,
     weight            => weight,
     zero_ifmap_new    => zero_ifmap_new,
-    zero_kernel_new   => zero_kernel_new
+    zero_kernel_new   => zero_kernel_new,
+    norm_ifmap        => norm_ifmap,
+    norm_kernel       => norm_kernel
   );
+
 
   mult_unit_i : entity work.mult_unit
   port map (
@@ -90,8 +95,20 @@ begin
     result_out        => result,
     zero_point_weight => zero_point_weight,
     zero_point_ifmap  => zero_point_ifmap,
-    valid             => valid_from_extract_to_mult,
-    valid_out         => valid_from_mult_to_acc
+    valid             => valid_from_extract_to_mult
+  --  valid_out         => valid_from_mult_to_acc
+  );
+
+  index_comp_i : entity work.index_comp
+  port map (
+    clk            => clk,
+    reset          => reset,
+    ifmap_index    => norm_ifmap,
+    weight_index   => norm_kernel,
+    to_index_out   => index_to_acc,
+    current_row_in => current_row,
+    valid_in       => valid_from_extract_to_mult,
+    fetch_ifmap    => new_ifmaps
   );
 
 

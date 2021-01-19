@@ -1,17 +1,17 @@
 ** Warning: (vlib-34) Library already exists at "work".
 Errors: 0, Warnings: 1
 Model Technology ModelSim - Intel FPGA Edition vcom 2020.3 Compiler 2020.07 Jul 22 2020
-Start time: 10:35:08 on Jan 19,2021
+Start time: 13:23:36 on Jan 19,2021
 vcom -2008 -work work ../src/core_pck.vhd 
 -- Loading package STANDARD
 -- Loading package TEXTIO
 -- Loading package std_logic_1164
 -- Loading package NUMERIC_STD
 -- Compiling package core_pck
-End time: 10:35:08 on Jan 19,2021, Elapsed time: 0:00:00
+End time: 13:23:36 on Jan 19,2021, Elapsed time: 0:00:00
 Errors: 0, Warnings: 0
 Model Technology ModelSim - Intel FPGA Edition vcom 2020.3 Compiler 2020.07 Jul 22 2020
-Start time: 10:35:08 on Jan 19,2021
+Start time: 13:23:36 on Jan 19,2021
 vcom -2008 -work work ../src/pe_pck.vhd 
 -- Loading package STANDARD
 -- Loading package TEXTIO
@@ -19,10 +19,10 @@ vcom -2008 -work work ../src/pe_pck.vhd
 -- Loading package NUMERIC_STD
 -- Loading package core_pck
 -- Compiling package pe_pack
-End time: 10:35:08 on Jan 19,2021, Elapsed time: 0:00:00
+End time: 13:23:36 on Jan 19,2021, Elapsed time: 0:00:00
 Errors: 0, Warnings: 0
 Model Technology ModelSim - Intel FPGA Edition vcom 2020.3 Compiler 2020.07 Jul 22 2020
-Start time: 10:35:08 on Jan 19,2021
+Start time: 13:23:36 on Jan 19,2021
 vcom -2008 -work work ../src/PE/fetch_unit_pck.vhd 
 -- Loading package STANDARD
 -- Loading package TEXTIO
@@ -33,10 +33,10 @@ vcom -2008 -work work ../src/PE/fetch_unit_pck.vhd
 -- Compiling package fetch_unit_pck
 -- Compiling package body fetch_unit_pck
 -- Loading package fetch_unit_pck
-End time: 10:35:08 on Jan 19,2021, Elapsed time: 0:00:00
+End time: 13:23:36 on Jan 19,2021, Elapsed time: 0:00:00
 Errors: 0, Warnings: 0
 Model Technology ModelSim - Intel FPGA Edition vcom 2020.3 Compiler 2020.07 Jul 22 2020
-Start time: 10:35:08 on Jan 19,2021
+Start time: 13:23:36 on Jan 19,2021
 vcom -2008 -work work ../src/PE/fetch_unit.vhd 
 -- Loading package STANDARD
 -- Loading package TEXTIO
@@ -47,10 +47,51 @@ vcom -2008 -work work ../src/PE/fetch_unit.vhd
 -- Loading package fetch_unit_pck
 -- Compiling entity fetch_unit
 -- Compiling architecture arch of fetch_unit
-End time: 10:35:08 on Jan 19,2021, Elapsed time: 0:00:00
+End time: 13:23:36 on Jan 19,2021, Elapsed time: 0:00:00
 Errors: 0, Warnings: 0
 Model Technology ModelSim - Intel FPGA Edition vcom 2020.3 Compiler 2020.07 Jul 22 2020
-Start time: 10:35:08 on Jan 19,2021
+Start time: 13:23:36 on Jan 19,2021
+vcom -2008 -work work ../src/PE/index_comp_unit.vhd 
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Loading package core_pck
+-- Loading package pe_pack
+-- Loading package ATTRIBUTES
+-- Loading package std_logic_misc
+-- Compiling entity index_comp
+-- Compiling architecture arch of index_comp
+End time: 13:23:36 on Jan 19,2021, Elapsed time: 0:00:00
+Errors: 0, Warnings: 0
+Model Technology ModelSim - Intel FPGA Edition vcom 2020.3 Compiler 2020.07 Jul 22 2020
+Start time: 13:23:36 on Jan 19,2021
+vcom -2008 -work work ../src/PE/mult_unit.vhd 
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Loading package core_pck
+-- Loading package pe_pack
+-- Compiling entity mult_unit
+-- Compiling architecture arch of mult_unit
+End time: 13:23:36 on Jan 19,2021, Elapsed time: 0:00:00
+Errors: 0, Warnings: 0
+Model Technology ModelSim - Intel FPGA Edition vcom 2020.3 Compiler 2020.07 Jul 22 2020
+Start time: 13:23:36 on Jan 19,2021
+vcom -2008 -work work ../src/PE/value_extract_unit.vhd 
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Loading package core_pck
+-- Loading package pe_pack
+-- Compiling entity value_extract_unit
+-- Compiling architecture arch of value_extract_unit
+End time: 13:23:36 on Jan 19,2021, Elapsed time: 0:00:00
+Errors: 0, Warnings: 0
+Model Technology ModelSim - Intel FPGA Edition vcom 2020.3 Compiler 2020.07 Jul 22 2020
+Start time: 13:23:36 on Jan 19,2021
 vcom -2008 -work work ../src/PE/PE.vhd 
 -- Loading package STANDARD
 -- Loading package TEXTIO
@@ -62,10 +103,15 @@ vcom -2008 -work work ../src/PE/PE.vhd
 -- Compiling architecture arch of PE
 -- Loading package fetch_unit_pck
 -- Loading entity fetch_unit
-End time: 10:35:08 on Jan 19,2021, Elapsed time: 0:00:00
+-- Loading entity value_extract_unit
+-- Loading entity mult_unit
+-- Loading package ATTRIBUTES
+-- Loading package std_logic_misc
+-- Loading entity index_comp
+End time: 13:23:37 on Jan 19,2021, Elapsed time: 0:00:01
 Errors: 0, Warnings: 0
 Model Technology ModelSim - Intel FPGA Edition vcom 2020.3 Compiler 2020.07 Jul 22 2020
-Start time: 10:35:08 on Jan 19,2021
+Start time: 13:23:37 on Jan 19,2021
 vcom -2008 -work work ../tb/test_utils.vhd 
 -- Loading package STANDARD
 -- Loading package TEXTIO
@@ -74,10 +120,10 @@ vcom -2008 -work work ../tb/test_utils.vhd
 -- Compiling package test_utils
 -- Compiling package body test_utils
 -- Loading package test_utils
-End time: 10:35:09 on Jan 19,2021, Elapsed time: 0:00:01
+End time: 13:23:37 on Jan 19,2021, Elapsed time: 0:00:00
 Errors: 0, Warnings: 0
 Model Technology ModelSim - Intel FPGA Edition vcom 2020.3 Compiler 2020.07 Jul 22 2020
-Start time: 10:35:09 on Jan 19,2021
+Start time: 13:23:37 on Jan 19,2021
 vcom -2008 -work work ../tb/PE_tb.vhd 
 -- Loading package STANDARD
 -- Loading package TEXTIO
@@ -89,5 +135,5 @@ vcom -2008 -work work ../tb/PE_tb.vhd
 -- Compiling entity PE_tb
 -- Compiling architecture arch of PE_tb
 -- Loading entity PE
-End time: 10:35:09 on Jan 19,2021, Elapsed time: 0:00:00
+End time: 13:23:37 on Jan 19,2021, Elapsed time: 0:00:00
 Errors: 0, Warnings: 0
